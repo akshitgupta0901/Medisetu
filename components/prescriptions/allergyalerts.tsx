@@ -8,21 +8,23 @@ export default function AllergyAlerts() {
       initial={{ opacity: 0, y: 24 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
+      transition={{ duration: 0.4 }}
       className="space-y-4"
     >
-      {/* Allergy Alert */}
-
+      {/* Critical Allergy Alert */}
       <div
         className="
           rounded-2xl
           border
           border-red-500/30
           bg-red-500/10
+          backdrop-blur-lg
           p-5
+          shadow-lg
         "
       >
-        <div className="flex gap-4">
-          <div className="text-red-400 text-xl">
+        <div className="flex gap-4 items-start">
+          <div className="text-red-400 text-xl flex-shrink-0">
             ⚠️
           </div>
 
@@ -31,43 +33,43 @@ export default function AllergyAlerts() {
               Critical Allergy Alert
             </h4>
 
-            <p className="text-sm text-slate-300 mt-2">
-              Patient has documented anaphylactic
-              reaction to
-              <span className="font-semibold text-red-400 ml-1">
+            <p className="mt-2 text-sm text-slate-300 leading-relaxed">
+              Patient has documented anaphylactic reaction to
+              <span className="ml-1 font-semibold text-red-400">
                 Penicillin
-              </span>
-              .
+              </span>.
             </p>
           </div>
         </div>
       </div>
 
-      {/* Interaction Alert */}
-
+      {/* Drug Interaction Alert */}
       <div
         className="
           rounded-2xl
           border
-          border-slate-700
-          bg-slate-900/60
+          border-teal-400/30
+          bg-gradient-to-br
+          from-slate-900/80
+          to-teal-900/20
+          backdrop-blur-lg
           p-5
+          shadow-lg
         "
       >
-        <div className="flex gap-4">
-          <div className="text-cyan-400 text-xl">
+        <div className="flex gap-4 items-start">
+          <div className="text-teal-300 text-xl flex-shrink-0">
             ℹ️
           </div>
 
           <div>
-            <h4 className="font-bold text-cyan-400">
+            <h4 className="font-bold text-teal-300">
               Interaction Warning
             </h4>
 
-            <p className="text-sm text-slate-400 mt-2">
-              Lisinopril + Ibuprofen may reduce
-              antihypertensive effect and increase
-              renal risk.
+            <p className="mt-2 text-sm text-slate-300 leading-relaxed">
+              Lisinopril + Ibuprofen may reduce antihypertensive effect
+              and increase renal risk.
             </p>
           </div>
         </div>
