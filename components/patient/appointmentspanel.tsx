@@ -1,0 +1,266 @@
+"use client";
+
+import { FormEvent, useCallback, useEffect, useState } from "react";
+import GlassCard from "./glasscard";
+import { authFetch } from "@/lib/fetch-auth";
+import type { SafeAppointment } from "@/types/appointment";
+import type { SafeUser } from "@/types/auth";
+import AppointmentItem from "@/components/appointments/appointmentitem";
+import {
+  getMinBookingDateString,
+  getMaxBookingDateString,
+} from "@/lib/appointments";
+
+export default function AppointmentsPanel() {
+  const [appointments, setAppointments] = useState<SafeAppointment[]>([]);
+  const [doctors, setDoctors] = useState<SafeUser[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [actionId, setActionId] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+  const [showForm, setShowForm] = useState(false);
+
+  const [doctorId, setDoctorId] = useState("");
+  const [date, setDate] = useState("");
+  const [time, setTime] = useState("");
+  const [reason, setReason] = useState("");
+  const [department, setDepartment] = useState("General");
+  const [type, setType] = useState<"in-person" | "telehealth">("telehealth");
+
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const [apptRes, docRes] = await Promise.all([
+        authFetch("/api/appointments"),
+        authFetch("/api/doctors"),
+      ]);
+
+      const apptData = await apptRes.json();
+      const docData = await docRes.json();
+
+      if (apptRes.ok && apptData.success) {
+        setAppointments(apptData.appointments);
+      } else {
+        setError(apptData.message ?? "Failed to load appointments");
+      }
+
+      if (docRes.ok && docData.success) {
+        setDoctors(docData.doctors);
+        setDoctorId((prev) => prev || docData.doctors[0]?._id || "");
+      }
+    } catch {
+      setError("Network error loading appointments");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  async function handleSubmit(e: FormEvent) {
+    e.preventDefault();
+    setSubmitting(true);
+    setError(null);
+    setSuccess(null);
+
+    try {
+      const res = await authFetch("/api/appointments", {
+        method: "POST",
+        body: JSON.stringify({
+          doctorId,
+          date,
+          time,
+          reason,
+          department,
+          type,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        setError(data.message ?? "Booking failed");
+        return;
+      }
+
+      setSuccess(data.message ?? "Appointment booked!");
+      setShowForm(false);
+      setReason("");
+      setDate("");
+      setTime("");
+      fetchData();
+    } catch {
+      setError("Network error. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  async function handleCancel(id: string) {
+    setActionId(id);
+    setError(null);
+    try {
+      const res = await authFetch(`/api/appointments/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify({ status: "cancelled" }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        setError(data.message ?? "Cancel failed");
+        return;
+      }
+      fetchData();
+    } catch {
+      setError("Network error");
+    } finally {
+      setActionId(null);
+    }
+  }
+
+  const upcoming = appointments.filter(
+    (a) => a.status !== "cancelled" && a.status !== "completed"
+  );
+
+  return (
+    <GlassCard className="md:col-span-12 p-6 md:p-8">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+        <div>
+          <h2 className="text-2xl font-bold text-white">My Appointments</h2>
+          <p className="text-sm text-[#86db70]/80 mt-1">
+            {upcoming.length} upcoming · {appointments.length} total
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() => setShowForm(!showForm)}
+          className="px-4 py-2 rounded-xl bg-[#86db70] text-black font-semibold hover:shadow-[0_0_20px_rgba(134,219,112,0.3)] transition text-sm"
+        >
+          {showForm ? "Close" : "+ Book Appointment"}
+        </button>
+      </div>
+
+      {error && (
+        <div className="mb-4 rounded-xl border border-red-500/30 bg-red-950/30 px-4 py-3 text-sm text-red-300">
+          {error}
+        </div>
+      )}
+      {success && (
+        <div className="mb-4 rounded-xl border border-[#1E5128] bg-[#86db70]/10 px-4 py-3 text-sm text-[#86db70]">
+          {success}
+        </div>
+      )}
+
+      {showForm && (
+        <form
+          onSubmit={handleSubmit}
+          className="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4 rounded-2xl border border-[#1E5128] bg-[#1d2022] p-5"
+        >
+          <div className="md:col-span-2">
+            <label className="text-xs text-slate-400 uppercase">Doctor</label>
+            <select
+              value={doctorId}
+              onChange={(e) => setDoctorId(e.target.value)}
+              required
+              className="mt-1 w-full bg-[#101415] border border-[#1E5128] rounded-xl p-3 text-white"
+            >
+              {doctors.map((d) => (
+                <option key={d._id} value={d._id}>
+                  {d.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="text-xs text-slate-400 uppercase">Date</label>
+            <input
+              type="date"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+              required
+              min={getMinBookingDateString()}
+              max={getMaxBookingDateString()}
+              className="mt-1 w-full bg-[#101415] border border-[#1E5128] rounded-xl p-3 text-white"
+            />
+            <p className="mt-1 text-xs text-slate-500">
+              Book up to 60 days in advance
+            </p>
+          </div>
+          <div>
+            <label className="text-xs text-slate-400 uppercase">Time</label>
+            <input
+              type="time"
+              value={time}
+              onChange={(e) => setTime(e.target.value)}
+              required
+              className="mt-1 w-full bg-[#101415] border border-[#1E5128] rounded-xl p-3 text-white"
+            />
+          </div>
+          <div>
+            <label className="text-xs text-slate-400 uppercase">Department</label>
+            <input
+              type="text"
+              value={department}
+              onChange={(e) => setDepartment(e.target.value)}
+              className="mt-1 w-full bg-[#101415] border border-[#1E5128] rounded-xl p-3 text-white"
+            />
+          </div>
+          <div>
+            <label className="text-xs text-slate-400 uppercase">Type</label>
+            <select
+              value={type}
+              onChange={(e) => setType(e.target.value as "in-person" | "telehealth")}
+              className="mt-1 w-full bg-[#101415] border border-[#1E5128] rounded-xl p-3 text-white"
+            >
+              <option value="telehealth">Telehealth</option>
+              <option value="in-person">In-person</option>
+            </select>
+          </div>
+          <div className="md:col-span-2">
+            <label className="text-xs text-slate-400 uppercase">Reason for visit</label>
+            <textarea
+              value={reason}
+              onChange={(e) => setReason(e.target.value)}
+              required
+              rows={2}
+              placeholder="Describe your symptoms or reason..."
+              className="mt-1 w-full bg-[#101415] border border-[#1E5128] rounded-xl p-3 text-white resize-none"
+            />
+          </div>
+          <div className="md:col-span-2">
+            <button
+              type="submit"
+              disabled={submitting || doctors.length === 0}
+              className="w-full py-3 rounded-xl bg-[#86db70] text-black font-bold disabled:opacity-50"
+            >
+              {submitting ? "Booking..." : "Confirm Booking"}
+            </button>
+          </div>
+        </form>
+      )}
+
+      {loading ? (
+        <p className="text-slate-400 text-sm py-8 text-center">Loading appointments...</p>
+      ) : appointments.length === 0 ? (
+        <p className="text-slate-400 text-sm py-8 text-center">
+          No appointments yet. Book your first visit above.
+        </p>
+      ) : (
+        <div className="space-y-3 max-h-[480px] overflow-y-auto pr-1">
+          {appointments.map((appt) => (
+            <AppointmentItem
+              key={appt._id}
+              appointment={appt}
+              variant="patient"
+              onCancel={handleCancel}
+              loadingId={actionId}
+            />
+          ))}
+        </div>
+      )}
+    </GlassCard>
+  );
+}

@@ -1,9 +1,10 @@
 import Sidebar from "../../components/patient/sidebar";
 import Topbar from "../../components/patient/topbar";
 import WelcomeCard from "../../components/patient/welcomecard";
-import HealthSummary from "../../components/patient/healthsummary";
+import MedicalRecordSummary from "../../components/patient/medicalrecordsummary";
 import SymptomChecker from "../../components/patient/symptomchecker";
 import AppointmentCard from "../../components/patient/appointmentcard";
+import AppointmentsPanel from "../../components/patient/appointmentspanel";
 import ActivityChart from "../../components/patient/activitychart";
 import SleepRecovery from "../../components/patient/sleeprecovery";
 import LocalSupport from "../../components/patient/localsupport";
@@ -20,12 +21,16 @@ export default function PatientPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
             <WelcomeCard />
-            <HealthSummary />
+            <MedicalRecordSummary />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
             <SymptomChecker />
             <AppointmentCard />
+          </div>
+
+          <div id="appointments">
+            <AppointmentsPanel />
           </div>
 
           <ActivityChart />

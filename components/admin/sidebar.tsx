@@ -1,11 +1,13 @@
 "use client";
 
 import Link from "next/link";
+import SidebarUserCard from "@/components/auth/sidebar-user-card";
 
 const navItems = [
   { label: "Dashboard", href: "/admin", active: true },
   { label: "Doctors", href: "#doctors" },
   { label: "Patients", href: "#patients" },
+  { label: "Appointments", href: "#appointments" },
   { label: "Consultations", href: "#" },
   { label: "Billing", href: "#" },
   { label: "Analytics", href: "#" },
@@ -22,14 +24,8 @@ export default function Sidebar() {
           Admin Console
         </p>
 
-        <div className="mt-6 flex items-center gap-3">
-          <div className="h-10 w-10 rounded-full bg-teal-500/20 flex items-center justify-center text-lg">
-            🛡️
-          </div>
-          <div>
-            <p className="font-semibold text-white">Priya Nair</p>
-            <p className="text-xs text-slate-400">System Administrator</p>
-          </div>
+        <div className="mt-6">
+          <SidebarUserCard />
         </div>
       </div>
 
@@ -52,9 +48,7 @@ export default function Sidebar() {
       <div className="p-4 border-t border-slate-800">
         <div className="rounded-xl bg-slate-900/80 border border-slate-800 p-4">
           <p className="text-xs text-slate-500 uppercase">Facility</p>
-          <p className="text-sm font-semibold text-white mt-1">
-            Metro General Hospital
-          </p>
+          <p className="text-sm font-semibold text-white mt-1">MediSetu Network</p>
           <p className="text-xs text-teal-400 mt-2">HIPAA Compliant · Tier 1</p>
         </div>
       </div>

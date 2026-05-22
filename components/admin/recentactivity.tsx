@@ -8,14 +8,14 @@ const activities = [
     type: "security",
     dot: "bg-teal-400",
     title: "Admin login from verified device",
-    detail: "Priya Nair · 192.168.1.42",
+    detail: "Admin session · verified device",
   },
   {
     time: "14:22",
     type: "clinical",
     dot: "bg-blue-400",
     title: "Lab results synced for Robert Simmons",
-    detail: "Cardiology · Dr. Vance notified",
+    detail: "Cardiology · attending physician notified",
   },
   {
     time: "13:58",

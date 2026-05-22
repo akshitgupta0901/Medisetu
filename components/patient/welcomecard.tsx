@@ -3,15 +3,15 @@
 import { motion, type Variants } from "framer-motion";
 import GlassCard from "./glasscard";
 import VitalChip from "./vitalchip";
+import { useAuth } from "@/contexts/auth-context";
+import UserAvatar from "@/components/auth/user-avatar";
+import { getFirstName, getShortId } from "@/lib/user-display";
 
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    transition: {
-      staggerChildren: 0.08,
-      delayChildren: 0.04,
-    },
+    transition: { staggerChildren: 0.08, delayChildren: 0.04 },
   },
 };
 
@@ -33,20 +33,16 @@ function SparkIcon() {
         strokeWidth="1.6"
         strokeLinejoin="round"
       />
-      <path
-        d="m18 16 .8 2.2L21 19l-2.2.8L18 22l-.8-2.2L15 19l2.2-.8L18 16Z"
-        stroke="currentColor"
-        strokeWidth="1.6"
-        strokeLinejoin="round"
-      />
     </svg>
   );
 }
 
 export default function WelcomeCard() {
+  const { user } = useAuth();
   const hour = new Date().getHours();
   const greeting =
     hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
+  const firstName = user ? getFirstName(user.name) : "there";
 
   return (
     <motion.section
@@ -58,14 +54,19 @@ export default function WelcomeCard() {
     >
       <GlassCard className="group relative h-full overflow-hidden p-6 transition duration-300 hover:border-[#67e8f9]/40 hover:shadow-xl hover:shadow-cyan-950/20 md:p-8">
         <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#67e8f9]/60 to-transparent" />
-        <div className="pointer-events-none absolute right-0 top-0 h-40 w-40 bg-[#2dd4bf]/[0.06]" />
 
         <div className="relative flex h-full flex-col gap-7 md:flex-row md:items-center md:gap-8">
           <motion.div variants={itemVariants} className="relative shrink-0">
             <div className="absolute -inset-1 rounded-3xl bg-gradient-to-br from-[#67e8f9]/25 to-[#2dd4bf]/10" />
-            <div className="relative flex h-24 w-24 items-center justify-center rounded-3xl border border-[#67e8f9]/25 bg-[#071827] text-2xl font-semibold text-[#cffafe] shadow-lg shadow-cyan-950/20">
-              AG
-            </div>
+            {user ? (
+              <UserAvatar
+                user={user}
+                size="lg"
+                className="relative !rounded-3xl border-[#67e8f9]/25"
+              />
+            ) : (
+              <div className="relative flex h-24 w-24 items-center justify-center rounded-3xl border border-[#67e8f9]/25 bg-[#071827] text-2xl font-semibold text-[#cffafe]" />
+            )}
             <span className="absolute bottom-2 right-2 h-3.5 w-3.5 rounded-full border-2 border-[#071827] bg-[#5eead4] shadow-[0_0_14px_rgba(94,234,212,0.75)]" />
           </motion.div>
 
@@ -75,22 +76,21 @@ export default function WelcomeCard() {
                 <span className="rounded-full border border-[#67e8f9]/15 bg-[#67e8f9]/10 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.22em] text-[#a5f3fc]">
                   AI Health Companion
                 </span>
-                <span className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-[#5eead4]">
-                  <span className="h-1.5 w-1.5 rounded-full bg-[#5eead4] shadow-[0_0_12px_rgba(94,234,212,0.75)]" />
-                  Live
-                </span>
               </div>
 
               <h2 className="text-3xl font-semibold tracking-tight text-[#f8fafc] md:text-4xl">
                 {greeting},{" "}
                 <span className="bg-gradient-to-r from-[#a5f3fc] to-[#5eead4] bg-clip-text text-transparent">
-                  Alex.
+                  {firstName}.
                 </span>
               </h2>
 
-              <p className="mt-2 text-sm font-medium tracking-[0.16em] text-[#94a3b8]">
-                PATIENT ID: <span className="text-[#cbd5e1]">MS-992-AI</span>
-              </p>
+              {user && (
+                <p className="mt-2 text-sm font-medium tracking-[0.16em] text-[#94a3b8]">
+                  PATIENT ID:{" "}
+                  <span className="text-[#cbd5e1]">MS-{getShortId(user._id)}</span>
+                </p>
+              )}
             </motion.div>
 
             <motion.div

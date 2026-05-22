@@ -4,11 +4,11 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 
 const navItems = [
-  { label: "Dashboard", active: true },
-  { label: "AI Triage", active: false },
-  { label: "Clinical History", active: false },
-  { label: "Patient Insights", active: false },
-  { label: "Settings", active: false },
+  { label: "Dashboard", href: "/triage", active: true },
+  { label: "AI Triage", href: "/ai-triage", active: false },
+  { label: "Clinical History", href: "#", active: false },
+  { label: "Patient Insights", href: "#", active: false },
+  { label: "Settings", href: "#", active: false },
 ];
 
 function CrossIcon() {
@@ -62,7 +62,7 @@ export default function Sidebar() {
         {navItems.map((item, index) => (
           <motion.a
             key={item.label}
-            href="#"
+            href={"href" in item ? item.href : "#"}
             initial={{ x: -10, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
             transition={{ duration: 0.35, delay: index * 0.04 }}

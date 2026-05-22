@@ -13,6 +13,8 @@ import ConsultationActivity from "@/components/doctor/consultationactivity";
 import AIRecommendation from "@/components/doctor/airecommendation";
 import RecoveryTrends from "@/components/doctor/recoverytrends";
 import RecentAlerts from "@/components/doctor/recentalerts";
+import AppointmentsPanel from "@/components/doctor/appointmentspanel";
+import PatientRecordsPanel from "@/components/doctor/patientrecordspanel";
 
 import FloatingActionButton from "@/components/doctor/floatingactionbutton";
 import MobileBottomNav from "@/components/doctor/mobilebottomnav";
@@ -32,6 +34,10 @@ export default function DoctorDashboard() {
             <CriticalCasesCard />
             <EfficiencyInsightCard />
           </section>
+
+          <AppointmentsPanel />
+
+          <PatientRecordsPanel />
 
           <section className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2">

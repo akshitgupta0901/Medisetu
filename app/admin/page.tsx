@@ -5,6 +5,7 @@ import DoctorManagement from "@/components/admin/doctormanagement";
 import PatientManagement from "@/components/admin/patientmanagement";
 import SystemHealth from "@/components/admin/systemhealth";
 import RecentActivity from "@/components/admin/recentactivity";
+import AppointmentsPanel from "@/components/admin/appointmentspanel";
 
 export default function AdminDashboard() {
   return (
@@ -16,6 +17,8 @@ export default function AdminDashboard() {
 
         <main className="p-4 md:p-6 space-y-6 md:space-y-8">
           <StatsCards />
+
+          <AppointmentsPanel />
 
           <section className="grid grid-cols-1 xl:grid-cols-3 gap-6 md:gap-8">
             <div className="xl:col-span-2 space-y-6 md:space-y-8">
