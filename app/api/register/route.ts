@@ -84,10 +84,20 @@ export async function POST(req: Request) {
       email: normalizedEmail,
       password: hashedPassword,
       role,
-      ...(role === "doctor" && specialization?.trim()
-        ? { specialization: specialization.trim() }
-        : {}),
     });
+
+    if (role === "patient") {
+      const Patient = (await import("@/models/Patient")).default;
+      await Patient.create({
+        userId: user._id,
+      });
+    } else if (role === "doctor") {
+      const Doctor = (await import("@/models/doctor")).default;
+      await Doctor.create({
+        userId: user._id,
+        specialization: specialization?.trim() || "General Physician",
+      });
+    }
 
     return NextResponse.json<RegisterSuccessResponse>(
       {

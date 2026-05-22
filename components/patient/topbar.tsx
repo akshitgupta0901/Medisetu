@@ -2,6 +2,7 @@
 
 import { useAuth } from "@/contexts/auth-context";
 import { getWelcomeMessage } from "@/lib/user-display";
+import NotificationBell from "@/components/notifications/notification-bell";
 
 export default function Topbar() {
   const { user } = useAuth();
@@ -13,13 +14,7 @@ export default function Topbar() {
       </h2>
 
       <div className="flex items-center gap-4">
-        <button
-          type="button"
-          className="w-10 h-10 rounded-full bg-[#272a2c] flex items-center justify-center hover:bg-[#323537] transition"
-          aria-label="Notifications"
-        >
-          🔔
-        </button>
+        <NotificationBell />
       </div>
     </header>
   );

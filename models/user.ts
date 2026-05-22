@@ -6,6 +6,9 @@ export interface IUser extends Document {
   email: string;
   password: string;
   role: UserRole;
+  specialization?: string;
+  profileImage?: string;
+  isSuspended: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -26,6 +29,9 @@ const UserSchema = new mongoose.Schema<IUser>(
       enum: ["doctor", "patient", "admin"],
       default: "patient",
     },
+    specialization: { type: String },
+    profileImage: { type: String },
+    isSuspended: { type: Boolean, default: false },
   },
   { timestamps: true }
 );

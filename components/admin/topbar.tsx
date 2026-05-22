@@ -2,6 +2,7 @@
 
 import { useAuth } from "@/contexts/auth-context";
 import { getWelcomeMessage } from "@/lib/user-display";
+import NotificationBell from "@/components/notifications/notification-bell";
 
 export default function Topbar() {
   const { user } = useAuth();
@@ -38,14 +39,7 @@ export default function Topbar() {
             Export Report
           </button>
 
-          <button
-            type="button"
-            className="relative p-2 rounded-xl hover:bg-slate-800 transition"
-            aria-label="Notifications"
-          >
-            <span className="text-2xl">🔔</span>
-            <span className="absolute top-1 right-1 h-2 w-2 bg-red-500 rounded-full" />
-          </button>
+          <NotificationBell />
         </div>
       </div>
     </header>

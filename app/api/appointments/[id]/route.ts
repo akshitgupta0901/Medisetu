@@ -158,6 +158,33 @@ export async function PATCH(req: Request, context: RouteContext) {
 
     const updated = await findAppointment(id);
 
+    // Create notifications for status changes
+    if (body.status) {
+      const { createNotification } = await import("@/lib/notifications");
+      
+      // If doctor updates, notify patient
+      if (auth.role === "doctor" || auth.role === "admin") {
+         await createNotification({
+           userId: getRefId(appointment.patientId),
+           title: `Appointment ${body.status.charAt(0).toUpperCase() + body.status.slice(1)}`,
+           message: `Your appointment with Dr. ${getRefId(appointment.doctorId)} has been ${body.status}.`,
+           type: "appointment",
+           link: `/patient`,
+         });
+      }
+      
+      // If patient cancels, notify doctor
+      if (auth.role === "patient" && body.status === "cancelled") {
+        await createNotification({
+          userId: getRefId(appointment.doctorId),
+          title: "Appointment Cancelled",
+          message: `A patient has cancelled their appointment for ${appointment.date.toDateString()}.`,
+          type: "appointment",
+          link: `/doctor`,
+        });
+      }
+    }
+
     return NextResponse.json<AppointmentSuccessResponse>({
       success: true,
       appointment: toSafeAppointment(updated!),

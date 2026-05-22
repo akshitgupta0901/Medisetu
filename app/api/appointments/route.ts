@@ -133,6 +133,16 @@ export async function POST(req: Request) {
       populateFields
     );
 
+    // Create notification for the doctor
+    const { createNotification } = await import("@/lib/notifications");
+    await createNotification({
+      userId: doctorId,
+      title: "New Appointment Request",
+      message: `You have a new appointment request from ${auth.email} for ${date} at ${time}.`,
+      type: "appointment",
+      link: `/doctor`,
+    });
+
     return NextResponse.json<AppointmentSuccessResponse>(
       {
         success: true,
