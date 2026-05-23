@@ -1,11 +1,13 @@
 "use client";
 
 import { motion, type Variants } from "framer-motion";
+import { useEffect, useState } from "react";
 import GlassCard from "./glasscard";
 import VitalChip from "./vitalchip";
 import { useAuth } from "@/contexts/auth-context";
 import UserAvatar from "@/components/auth/user-avatar";
 import { getFirstName, getShortId } from "@/lib/user-display";
+import { authFetch } from "@/lib/fetch-auth";
 
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
@@ -43,6 +45,29 @@ export default function WelcomeCard() {
   const greeting =
     hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
   const firstName = user ? getFirstName(user.name) : "there";
+
+  const [vitals, setVitals] = useState<{ heartRate: number; bloodOxygen: number; glucose: number } | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function fetchVitals() {
+      try {
+        const res = await authFetch("/api/patients/vitals");
+        const data = await res.json();
+        if (res.ok && data.success) {
+          setVitals(data.vitals);
+        } else {
+          setError(data.message || "Failed to load vitals.");
+        }
+      } catch (err) {
+        setError("Network error fetching vitals.");
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchVitals();
+  }, []);
 
   return (
     <motion.section
@@ -97,9 +122,19 @@ export default function WelcomeCard() {
               variants={itemVariants}
               className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-3"
             >
-              <VitalChip label="Heart Rate" value="72" unit="BPM" />
-              <VitalChip label="Blood Oxygen" value="98" unit="%" />
-              <VitalChip label="Glucose" value="5.4" unit="mmol/L" />
+              {loading ? (
+                <div className="col-span-3 text-slate-400 text-sm">Loading vitals...</div>
+              ) : error ? (
+                <div className="col-span-3 text-red-400 text-sm">{error}</div>
+              ) : !vitals ? (
+                <div className="col-span-3 text-slate-400 text-sm">No vitals data available.</div>
+              ) : (
+                <>
+                  <VitalChip label="Heart Rate" value={vitals.heartRate.toString()} unit="BPM" />
+                  <VitalChip label="Blood Oxygen" value={vitals.bloodOxygen.toString()} unit="%" />
+                  <VitalChip label="Glucose" value={vitals.glucose.toString()} unit="mmol/L" />
+                </>
+              )}
             </motion.div>
 
             <motion.div
