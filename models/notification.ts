@@ -4,7 +4,7 @@ export interface INotification extends Document {
   userId: Types.ObjectId;
   title: string;
   message: string;
-  type: "appointment" | "prescription" | "admin" | "info";
+  type: "appointment" | "prescription" | "admin" | "info" | "triage" | "consultation";
   isRead: boolean;
   link?: string;
   createdAt: Date;
@@ -22,7 +22,7 @@ const NotificationSchema = new mongoose.Schema<INotification>(
     message: { type: String, required: true },
     type: {
       type: String,
-      enum: ["appointment", "prescription", "admin", "info"],
+      enum: ["appointment", "prescription", "admin", "info", "triage", "consultation"],
       default: "info",
     },
     isRead: { type: Boolean, default: false },

@@ -10,12 +10,13 @@ const navItems = [
   { label: "User Management", href: "/admin/users" },
   { label: "Doctors", href: "/admin/users?role=doctor" },
   { label: "Patients", href: "/admin/users?role=patient" },
-  { label: "Appointments", href: "/coming-soon?feature=Appointments" },
-  { label: "Consultations", href: "/coming-soon?feature=Consultations" },
-  { label: "Billing", href: "/coming-soon?feature=Billing" },
-  { label: "Analytics", href: "/coming-soon?feature=Analytics" },
-  { label: "Compliance", href: "/coming-soon?feature=Compliance" },
-  { label: "Settings", href: "/coming-soon?feature=Settings" },
+  { label: "Appointments", href: "/admin/appointments" },
+  { label: "Consultations", href: "/admin/consultations" },
+  { label: "Triage Reports", href: "/admin/triage" },
+  { label: "Billing", href: "/admin/billing" },
+  { label: "Analytics", href: "/admin/analytics" },
+  { label: "Compliance", href: "/admin/audit" },
+  { label: "Settings", href: "/admin/settings" },
 ];
 
 export default function Sidebar() {
@@ -40,7 +41,8 @@ export default function Sidebar() {
             key={item.label}
             href={item.href}
             className={`block rounded-lg px-4 py-3 text-sm transition ${
-              pathname === item.href
+              pathname === item.href ||
+              (item.href.includes("?") && pathname === item.href.split("?")[0])
                 ? "bg-teal-500/15 text-teal-400 border border-teal-500/20"
                 : "text-slate-300 hover:bg-slate-800 hover:text-teal-400"
             }`}

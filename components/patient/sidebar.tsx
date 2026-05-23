@@ -8,11 +8,12 @@ import { usePathname } from "next/navigation";
 const navItems = [
   { label: "Dashboard", href: "/patient" },
   { label: "Medical Profile", href: "/patient/profile" },
-  { label: "AI Symptom Check", href: "/ai-triage" },
+  { label: "AI Triage", href: "/patient/triage" },
+  { label: "Live Consultations", href: "/telehealth" },
   { label: "Appointments", href: "/patient#appointments" },
-  { label: "Lab Results", href: "/coming-soon?feature=Lab Results" },
-  { label: "My Prescriptions", href: "/coming-soon?feature=Prescriptions" },
-  { label: "Settings", href: "/coming-soon?feature=Settings" },
+  { label: "Lab Results", href: "/patient/lab-results" },
+  { label: "My Prescriptions", href: "/patient/prescriptions" },
+  { label: "Settings", href: "/patient/settings" },
 ];
 
 export default function Sidebar() {

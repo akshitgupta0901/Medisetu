@@ -5,5 +5,7 @@ export default function TelehealthLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <AuthGuard role="doctor">{children}</AuthGuard>;
+  return (
+    <AuthGuard roles={["doctor", "patient"]}>{children}</AuthGuard>
+  );
 }

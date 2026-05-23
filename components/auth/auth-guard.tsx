@@ -6,11 +6,14 @@ import type { UserRole } from "@/types/auth";
 export default function AuthGuard({
   children,
   role,
+  roles,
 }: {
   children: React.ReactNode;
-  role: UserRole;
+  role?: UserRole;
+  roles?: UserRole[];
 }) {
-  const { user, loading } = useRequireAuth(role);
+  const allowed = roles ?? (role ? [role] : []);
+  const { user, loading } = useRequireAuth(allowed);
 
   if (loading) {
     return (
@@ -23,7 +26,7 @@ export default function AuthGuard({
     );
   }
 
-  if (!user || user.role !== role) {
+  if (!user || !allowed.includes(user.role)) {
     return null;
   }
 

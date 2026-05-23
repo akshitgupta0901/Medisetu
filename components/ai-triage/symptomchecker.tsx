@@ -3,6 +3,7 @@
 import { FormEvent, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { TriageAnalysis, SeverityLevel } from "@/types/ai-triage";
+import { authFetch } from "@/lib/fetch-auth";
 
 const SEVERITY_STYLES: Record<
   SeverityLevel,
@@ -57,9 +58,8 @@ export default function SymptomChecker() {
     setAnalysis(null);
 
     try {
-      const res = await fetch("/api/ai-triage", {
+      const res = await authFetch("/api/ai-triage", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           symptoms: symptoms.trim(),
           age: age ? Number(age) : undefined,
@@ -288,10 +288,10 @@ export default function SymptomChecker() {
 
             <div className="flex flex-wrap gap-3">
               <a
-                href="/patient#appointments"
+                href="/patient/triage"
                 className="rounded-full bg-cyan-200 px-6 py-3 text-sm font-semibold text-[#06111d] hover:bg-white transition"
               >
-                Book appointment
+                View triage history
               </a>
               <button
                 type="button"

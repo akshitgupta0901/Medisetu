@@ -25,6 +25,8 @@ export interface TriageRequestBody {
 export interface TriageSuccessResponse {
   success: true;
   analysis: TriageAnalysis;
+  reportId?: string;
+  report?: unknown;
 }
 
 export interface TriageErrorResponse {

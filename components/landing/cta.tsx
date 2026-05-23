@@ -25,17 +25,17 @@ export default function CTA() {
 
           <div className="mt-10 flex flex-col justify-center gap-4 sm:flex-row">
             <a
-              href="#"
+              href="/login"
               className="inline-flex items-center justify-center rounded-full bg-cyan-200 px-8 py-4 text-sm font-semibold text-[#06111d] shadow-lg shadow-cyan-500/15 transition duration-300 hover:-translate-y-0.5 hover:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-200 focus-visible:ring-offset-2 focus-visible:ring-offset-[#07131f]"
             >
-              Start free consultation
+              Sign in to platform
             </a>
 
             <a
-              href="#diagnostics"
+              href="/role-select"
               className="inline-flex items-center justify-center rounded-full border border-white/[0.12] bg-white/[0.035] px-8 py-4 text-sm font-semibold text-white transition duration-300 hover:-translate-y-0.5 hover:border-cyan-200/35 hover:bg-white/[0.08] focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-200/70"
             >
-              Explore care network
+              Start AI triage
             </a>
           </div>
         </div>

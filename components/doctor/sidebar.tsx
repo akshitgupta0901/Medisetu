@@ -9,12 +9,12 @@ const navItems = [
   { label: "Dashboard", href: "/doctor" },
   { label: "Patient Records", href: "/doctor#patient-records" },
   { label: "Patient Queue", href: "/doctor#patient-queue" },
+  { label: "AI Triage Reports", href: "/doctor/ai-reports" },
   { label: "Live Consultations", href: "/telehealth" },
+  { label: "Analytics", href: "/doctor/analytics" },
   { label: "Professional Profile", href: "/doctor/profile" },
-  { label: "AI Reports", href: "/coming-soon?feature=AI Reports" },
   { label: "Prescriptions", href: "/prescriptions" },
-  { label: "Analytics", href: "/coming-soon?feature=Analytics" },
-  { label: "Settings", href: "/coming-soon?feature=Settings" },
+  { label: "Settings", href: "/doctor/settings" },
 ];
 
 export default function Sidebar() {

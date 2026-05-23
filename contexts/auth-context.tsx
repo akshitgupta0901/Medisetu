@@ -106,7 +106,7 @@ export function useAuth(): AuthContextValue {
   return ctx;
 }
 
-export function useRequireAuth(requiredRole?: UserRole) {
+export function useRequireAuth(requiredRoles?: UserRole[]) {
   const auth = useAuth();
   const router = useRouter();
 
@@ -120,10 +120,10 @@ export function useRequireAuth(requiredRole?: UserRole) {
       return;
     }
 
-    if (requiredRole && auth.user.role !== requiredRole) {
+    if (requiredRoles && !requiredRoles.includes(auth.user.role)) {
       router.replace("/login?error=unauthorized");
     }
-  }, [auth.loading, auth.user, requiredRole, router]);
+  }, [auth.loading, auth.user, requiredRoles, router]);
 
   return auth;
 }

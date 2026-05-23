@@ -4,7 +4,7 @@ export async function createNotification(data: {
   userId: string;
   title: string;
   message: string;
-  type?: "appointment" | "prescription" | "admin" | "info";
+  type?: "appointment" | "prescription" | "admin" | "info" | "triage" | "consultation";
   link?: string;
 }) {
   try {

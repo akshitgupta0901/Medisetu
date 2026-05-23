@@ -4,12 +4,14 @@ import { verifyTokenEdge } from "@/lib/auth-edge";
 import { TOKEN_COOKIE_NAME } from "@/lib/constants";
 import type { TokenPayload, UserRole } from "@/types/auth";
 
-const PROTECTED_ROUTES: Record<string, UserRole> = {
-  "/admin": "admin",
-  "/doctor": "doctor",
-  "/patient": "patient",
-  "/prescriptions": "doctor",
-  "/telehealth": "doctor",
+const ROUTE_PERMISSIONS: Record<string, UserRole[]> = {
+  "/admin": ["admin"],
+  "/doctor": ["doctor"],
+  "/patient": ["patient"],
+  "/prescriptions": ["doctor"],
+  "/triage": ["doctor"],
+  "/telehealth": ["doctor", "patient"],
+  "/ai-triage": ["patient"],
 };
 
 function getTokenFromRequest(request: NextRequest): string | null {
@@ -21,10 +23,10 @@ function getTokenFromRequest(request: NextRequest): string | null {
   return request.cookies.get(TOKEN_COOKIE_NAME)?.value ?? null;
 }
 
-function getRequiredRole(pathname: string): UserRole | null {
-  for (const [route, role] of Object.entries(PROTECTED_ROUTES)) {
+function getAllowedRoles(pathname: string): UserRole[] | null {
+  for (const [route, roles] of Object.entries(ROUTE_PERMISSIONS)) {
     if (pathname === route || pathname.startsWith(`${route}/`)) {
-      return role;
+      return roles;
     }
   }
   return null;
@@ -32,9 +34,9 @@ function getRequiredRole(pathname: string): UserRole | null {
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const requiredRole = getRequiredRole(pathname);
+  const allowedRoles = getAllowedRoles(pathname);
 
-  if (!requiredRole) {
+  if (!allowedRoles) {
     return NextResponse.next();
   }
 
@@ -57,7 +59,7 @@ export async function middleware(request: NextRequest) {
     return response;
   }
 
-  if (payload.role !== requiredRole) {
+  if (!allowedRoles.includes(payload.role)) {
     const acceptsHtml = request.headers.get("accept")?.includes("text/html");
 
     if (acceptsHtml) {
@@ -69,7 +71,7 @@ export async function middleware(request: NextRequest) {
     return new NextResponse(
       JSON.stringify({
         success: false,
-        message: `Unauthorized. ${requiredRole} role required.`,
+        message: `Unauthorized. Required role not granted.`,
       }),
       {
         status: 403,
@@ -95,5 +97,7 @@ export const config = {
     "/patient/:path*",
     "/prescriptions/:path*",
     "/telehealth/:path*",
+    "/triage/:path*",
+    "/ai-triage/:path*",
   ],
 };

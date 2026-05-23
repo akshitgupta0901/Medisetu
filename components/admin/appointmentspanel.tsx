@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { authFetch } from "@/lib/fetch-auth";
 import type { SafeAppointment, AppointmentStatus } from "@/types/appointment";
 import AppointmentItem from "@/components/appointments/appointmentitem";
+import ExportButton from "@/components/admin/export-button";
 
 export default function AppointmentsPanel() {
   const [appointments, setAppointments] = useState<SafeAppointment[]>([]);
@@ -77,6 +78,17 @@ export default function AppointmentsPanel() {
             Hospital-wide scheduling overview
           </p>
         </div>
+        <div className="flex flex-wrap items-center gap-3">
+          <ExportButton
+            data={appointments.map((a) => ({
+              id: a._id,
+              patient: a.patient?.name ?? a.patientId,
+              doctor: a.doctor?.name ?? a.doctorId,
+              date: a.date,
+              status: a.status,
+            }))}
+            filename="appointments-export"
+          />
         <div className="flex flex-wrap gap-3 text-center">
           <div className="rounded-xl bg-amber-950/30 border border-amber-500/20 px-4 py-2">
             <p className="text-lg font-bold text-amber-400">{stats.pending}</p>
@@ -90,6 +102,7 @@ export default function AppointmentsPanel() {
             <p className="text-lg font-bold text-emerald-400">{stats.completed}</p>
             <p className="text-xs text-slate-500">Completed</p>
           </div>
+        </div>
         </div>
       </div>
 

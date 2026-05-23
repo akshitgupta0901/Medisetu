@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import type { SafeAppointment } from "@/types/appointment";
 import StatusBadge from "./statusbadge";
 
@@ -18,6 +19,7 @@ export default function AppointmentItem({
   onCancel,
   loadingId,
 }: AppointmentItemProps) {
+  const router = useRouter();
   const isLoading = loadingId === appointment._id;
   const isPatient = variant === "patient";
   const isDoctor = variant === "doctor";
@@ -30,6 +32,26 @@ export default function AppointmentItem({
   const subLabel = isPatient
     ? appointment.department
     : appointment.patient?.email ?? "";
+
+  const startConsultation = async () => {
+    try {
+      const res = await fetch("/api/live-consultations", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          doctorId: appointment.doctorId,
+          patientId: appointment.patientId,
+          appointmentId: appointment._id,
+          reason: appointment.reason,
+        }),
+      });
+      if (res.ok) {
+        router.push("/telehealth");
+      }
+    } catch (e) {
+      console.error("Failed to start consultation:", e);
+    }
+  };
 
   return (
     <div
@@ -68,6 +90,15 @@ export default function AppointmentItem({
 
           {(isDoctor || isAdmin) && onStatusChange && (
             <>
+              {appointment.status === "approved" && (
+                <button
+                  type="button"
+                  onClick={startConsultation}
+                  className="px-3 py-1.5 rounded-lg text-xs bg-cyan-500/20 text-cyan-300 hover:bg-cyan-500/30"
+                >
+                  Start Consultation
+                </button>
+              )}
               {appointment.status === "pending" && (
                 <button
                   type="button"
