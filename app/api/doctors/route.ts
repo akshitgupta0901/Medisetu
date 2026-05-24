@@ -15,7 +15,7 @@ export async function GET(req: Request) {
 
     await connectDB();
 
-    const doctors = await User.find({ role: "doctor" })
+    const doctors = await User.find({ role: "doctor", isSuspended: false })
       .select("name email role")
       .sort({ name: 1 });
 

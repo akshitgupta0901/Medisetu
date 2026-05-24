@@ -5,7 +5,8 @@ import Sidebar from "@/components/patient/sidebar";
 import Topbar from "@/components/patient/topbar";
 import MobileBottomNav from "@/components/patient/mobilebottomnav";
 import GlassCard from "@/components/patient/glasscard";
-import { Pill, Calendar, User, Info, Loader2, ChevronRight } from "lucide-react";
+import { authFetch } from "@/lib/fetch-auth";
+import { Pill, Calendar, User, Info, Loader2 } from "lucide-react";
 
 export default function PatientPrescriptionsPage() {
   const [prescriptions, setPrescriptions] = useState<any[]>([]);
@@ -14,7 +15,7 @@ export default function PatientPrescriptionsPage() {
   useEffect(() => {
     const fetchPrescriptions = async () => {
       try {
-        const res = await fetch("/api/prescriptions");
+        const res = await authFetch("/api/prescriptions");
         const data = await res.json();
         if (data.success) {
           setPrescriptions(data.prescriptions);

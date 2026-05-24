@@ -37,8 +37,8 @@ export default function ActivityChart() {
             </p>
           </div>
 
-          <div className="rounded-2xl border border-[#67e8f9]/15 bg-[#67e8f9]/[0.055] px-5 py-4 text-left sm:text-right">
-            <h3 className="text-3xl font-semibold tracking-tight text-[#a5f3fc]">
+          <div className="rounded-2xl border border-[#67e8f9]/15 bg-cyan-400/[0.055] px-5 py-4 text-left sm:text-right">
+            <h3 className="text-3xl font-semibold tracking-tight text-cyan-400">
               7,432
             </h3>
             <p className="mt-1 text-xs font-semibold uppercase tracking-[0.18em] text-[#94a3b8]">

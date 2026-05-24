@@ -82,7 +82,7 @@ export default function AppointmentItem({
               type="button"
               onClick={() => onCancel(appointment._id)}
               disabled={isLoading}
-              className="px-3 py-1.5 rounded-lg text-xs border border-red-500/30 text-red-400 hover:bg-red-950/30 disabled:opacity-50"
+              className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-red-500 text-white hover:bg-red-400 disabled:opacity-50"
             >
               {isLoading ? "..." : "Cancel"}
             </button>
@@ -94,7 +94,7 @@ export default function AppointmentItem({
                 <button
                   type="button"
                   onClick={startConsultation}
-                  className="px-3 py-1.5 rounded-lg text-xs bg-cyan-500/20 text-cyan-300 hover:bg-cyan-500/30"
+                  className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-cyan-300 text-slate-950 hover:bg-cyan-200"
                 >
                   Start Consultation
                 </button>
@@ -104,7 +104,7 @@ export default function AppointmentItem({
                   type="button"
                   onClick={() => onStatusChange(appointment._id, "approved")}
                   disabled={isLoading}
-                  className="px-3 py-1.5 rounded-lg text-xs bg-teal-500/20 text-teal-300 hover:bg-teal-500/30 disabled:opacity-50"
+                  className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-teal-300 text-slate-950 hover:bg-teal-200 disabled:opacity-50"
                 >
                   Approve
                 </button>
@@ -114,7 +114,7 @@ export default function AppointmentItem({
                   type="button"
                   onClick={() => onStatusChange(appointment._id, "completed")}
                   disabled={isLoading}
-                  className="px-3 py-1.5 rounded-lg text-xs bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/30 disabled:opacity-50"
+                  className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-300 text-slate-950 hover:bg-emerald-200 disabled:opacity-50"
                 >
                   Complete
                 </button>
@@ -124,7 +124,7 @@ export default function AppointmentItem({
                   type="button"
                   onClick={() => onStatusChange(appointment._id, "cancelled")}
                   disabled={isLoading}
-                  className="px-3 py-1.5 rounded-lg text-xs border border-slate-700 text-slate-400 hover:bg-slate-800 disabled:opacity-50"
+                  className="px-3 py-1.5 rounded-lg text-xs font-semibold border border-red-400/60 bg-red-500/10 text-red-100 hover:bg-red-500/20 disabled:opacity-50"
                 >
                   Cancel
                 </button>

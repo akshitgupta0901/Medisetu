@@ -4,9 +4,9 @@ import { motion } from "framer-motion";
 import GlassCard from "./glasscard";
 
 const sleepStages = [
-  { label: "Deep", value: "2h 10m", width: "32%", color: "bg-[#67e8f9]" },
-  { label: "REM", value: "1h 35m", width: "24%", color: "bg-[#5eead4]" },
-  { label: "Light", value: "3h 35m", width: "44%", color: "bg-[#93c5fd]" },
+  { label: "Deep", value: "2h 10m", width: "32%", color: "bg-cyan-400" },
+  { label: "REM", value: "1h 35m", width: "24%", color: "bg-teal-400" },
+  { label: "Light", value: "3h 35m", width: "44%", color: "bg-blue-400" },
 ];
 
 const recoverySignals = [
@@ -28,7 +28,7 @@ export default function SleepRecovery() {
 
         <div className="grid gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#5eead4]">
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-teal-400">
               Recovery analytics
             </p>
             <h2 className="mt-3 text-2xl font-semibold tracking-tight text-[#f8fafc] md:text-3xl">
@@ -42,7 +42,7 @@ export default function SleepRecovery() {
               <h3 className="text-4xl font-semibold tracking-tight text-[#ccfbf1]">
                 7h 20m
               </h3>
-              <p className="pb-1 text-sm font-medium text-[#5eead4]">
+              <p className="pb-1 text-sm font-medium text-teal-400">
                 +42m vs baseline
               </p>
             </div>

@@ -92,13 +92,13 @@ export default function WelcomeCard() {
             ) : (
               <div className="relative flex h-24 w-24 items-center justify-center rounded-3xl border border-[#67e8f9]/25 bg-[#071827] text-2xl font-semibold text-[#cffafe]" />
             )}
-            <span className="absolute bottom-2 right-2 h-3.5 w-3.5 rounded-full border-2 border-[#071827] bg-[#5eead4] shadow-[0_0_14px_rgba(94,234,212,0.75)]" />
+            <span className="absolute bottom-2 right-2 h-3.5 w-3.5 rounded-full border-2 border-[#071827] bg-teal-400 shadow-[0_0_14px_rgba(94,234,212,0.75)]" />
           </motion.div>
 
           <div className="min-w-0 flex-1">
             <motion.div variants={itemVariants}>
               <div className="mb-3 flex flex-wrap items-center gap-3">
-                <span className="rounded-full border border-[#67e8f9]/15 bg-[#67e8f9]/10 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.22em] text-[#a5f3fc]">
+                <span className="rounded-full border border-[#67e8f9]/15 bg-cyan-400/10 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.22em] text-cyan-400">
                   AI Health Companion
                 </span>
               </div>
@@ -118,35 +118,34 @@ export default function WelcomeCard() {
               )}
             </motion.div>
 
-            <motion.div
-              variants={itemVariants}
-              className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-3"
-            >
-              {loading ? (
-                <div className="col-span-3 text-slate-400 text-sm">Loading vitals...</div>
-              ) : error ? (
-                <div className="col-span-3 text-red-400 text-sm">{error}</div>
-              ) : !vitals ? (
-                <div className="col-span-3 text-slate-400 text-sm">No vitals data available.</div>
-              ) : (
-                <>
-                  <VitalChip label="Heart Rate" value={vitals.heartRate.toString()} unit="BPM" />
-                  <VitalChip label="Blood Oxygen" value={vitals.bloodOxygen.toString()} unit="%" />
-                  <VitalChip label="Glucose" value={vitals.glucose.toString()} unit="mmol/L" />
-                </>
-              )}
-            </motion.div>
+              <motion.div
+                variants={itemVariants}
+                className="mt-6 flex gap-4"
+              >
+                <a
+                  href="/patient/triage"
+                  className="rounded-xl bg-teal-500 hover:bg-teal-400 text-black font-bold px-6 py-3 transition"
+                >
+                  Check Symptoms
+                </a>
+                <a
+                  href="#appointments"
+                  className="rounded-xl border border-slate-700 hover:bg-slate-800 text-white font-bold px-6 py-3 transition"
+                >
+                  Book Appointment
+                </a>
+              </motion.div>
 
             <motion.div
               variants={itemVariants}
-              className="mt-5 flex items-start gap-3 rounded-2xl border border-[#67e8f9]/15 bg-[#67e8f9]/[0.055] px-4 py-3"
+              className="mt-5 flex items-start gap-3 rounded-2xl border border-[#67e8f9]/15 bg-cyan-400/[0.055] px-4 py-3"
             >
-              <span className="mt-0.5 text-[#a5f3fc]">
+              <span className="mt-0.5 text-cyan-400">
                 <SparkIcon />
               </span>
               <p className="text-sm leading-6 text-[#cbd5e1]">
                 AI review shows stable vitals with no anomaly pattern in the
-                last <span className="font-semibold text-[#5eead4]">24 hours</span>.
+                last <span className="font-semibold text-teal-400">24 hours</span>.
               </p>
             </motion.div>
           </div>

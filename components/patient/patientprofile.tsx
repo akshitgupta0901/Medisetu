@@ -138,7 +138,7 @@ export default function PatientProfile() {
   if (loading) {
     return (
       <GlassCard className="p-8">
-        <p className="text-[#c5c6cd]">Loading medical profile...</p>
+        <p className="text-[slate-400]">Loading medical profile...</p>
       </GlassCard>
     );
   }
@@ -147,7 +147,7 @@ export default function PatientProfile() {
     <form onSubmit={handleSubmit} className="space-y-6">
       <GlassCard className="p-6 md:p-8">
         <h2 className="text-2xl font-bold text-white mb-1">Medical Profile</h2>
-        <p className="text-sm text-[#c5c6cd] mb-6">
+        <p className="text-sm text-[slate-400] mb-6">
           {record ? "Update your health information" : "Create your patient record"}
         </p>
 
@@ -157,7 +157,7 @@ export default function PatientProfile() {
           </div>
         )}
         {success && (
-          <div className="mb-4 rounded-xl border border-[#1E5128] bg-[#86db70]/10 px-4 py-3 text-sm text-[#86db70]">
+          <div className="mb-4 rounded-xl border border-[slate-800] bg-[teal-400]/10 px-4 py-3 text-sm text-[teal-400]">
             {success}
           </div>
         )}
@@ -168,7 +168,7 @@ export default function PatientProfile() {
             <select
               value={bloodGroup}
               onChange={(e) => setBloodGroup(e.target.value as BloodGroup)}
-              className="mt-1 w-full bg-[#101415] border border-[#1E5128] rounded-xl p-3 text-white"
+              className="mt-1 w-full bg-[slate-950] border border-[slate-800] rounded-xl p-3 text-white"
             >
               {BLOOD_GROUPS.map((bg) => (
                 <option key={bg} value={bg}>{bg}</option>
@@ -181,18 +181,21 @@ export default function PatientProfile() {
               type="date"
               value={dateOfBirth}
               onChange={(e) => setDateOfBirth(e.target.value)}
-              className="mt-1 w-full bg-[#101415] border border-[#1E5128] rounded-xl p-3 text-white"
+              className="mt-1 w-full bg-[slate-950] border border-[slate-800] rounded-xl p-3 text-white"
             />
           </div>
           <div>
-            <label className="text-xs text-[#94a3b8] uppercase">Gender</label>
-            <input
-              type="text"
+            <label className="text-xs text-slate-400 uppercase">Gender</label>
+            <select
               value={gender}
               onChange={(e) => setGender(e.target.value)}
-              placeholder="e.g. Female"
-              className="mt-1 w-full bg-[#101415] border border-[#1E5128] rounded-xl p-3 text-white"
-            />
+              className="mt-1 w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white focus:border-teal-500 outline-none"
+            >
+              <option value="">Select Gender</option>
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+              <option value="Other">Other</option>
+            </select>
           </div>
           <div>
             <label className="text-xs text-[#94a3b8] uppercase">Phone</label>
@@ -200,7 +203,7 @@ export default function PatientProfile() {
               type="tel"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
-              className="mt-1 w-full bg-[#101415] border border-[#1E5128] rounded-xl p-3 text-white"
+              className="mt-1 w-full bg-[slate-950] border border-[slate-800] rounded-xl p-3 text-white"
             />
           </div>
           <div className="md:col-span-2">
@@ -209,7 +212,7 @@ export default function PatientProfile() {
               type="text"
               value={address}
               onChange={(e) => setAddress(e.target.value)}
-              className="mt-1 w-full bg-[#101415] border border-[#1E5128] rounded-xl p-3 text-white"
+              className="mt-1 w-full bg-[slate-950] border border-[slate-800] rounded-xl p-3 text-white"
             />
           </div>
           <div className="md:col-span-3">
@@ -221,7 +224,7 @@ export default function PatientProfile() {
               value={allergiesText}
               onChange={(e) => setAllergiesText(e.target.value)}
               placeholder="Penicillin, Peanuts, Latex"
-              className="mt-1 w-full bg-[#101415] border border-[#1E5128] rounded-xl p-3 text-white"
+              className="mt-1 w-full bg-[slate-950] border border-[slate-800] rounded-xl p-3 text-white"
             />
           </div>
         </div>
@@ -234,7 +237,7 @@ export default function PatientProfile() {
             placeholder="Name"
             value={emergency.name}
             onChange={(e) => setEmergency({ ...emergency, name: e.target.value })}
-            className="bg-[#101415] border border-[#1E5128] rounded-xl p-3 text-white"
+            className="bg-[slate-950] border border-[slate-800] rounded-xl p-3 text-white"
           />
           <input
             placeholder="Relationship"
@@ -242,21 +245,21 @@ export default function PatientProfile() {
             onChange={(e) =>
               setEmergency({ ...emergency, relationship: e.target.value })
             }
-            className="bg-[#101415] border border-[#1E5128] rounded-xl p-3 text-white"
+            className="bg-[slate-950] border border-[slate-800] rounded-xl p-3 text-white"
           />
           <input
             placeholder="Phone"
             value={emergency.phone}
             onChange={(e) => setEmergency({ ...emergency, phone: e.target.value })}
             required
-            className="bg-[#101415] border border-[#1E5128] rounded-xl p-3 text-white"
+            className="bg-[slate-950] border border-[slate-800] rounded-xl p-3 text-white"
           />
           <input
             placeholder="Email (optional)"
             type="email"
             value={emergency.email ?? ""}
             onChange={(e) => setEmergency({ ...emergency, email: e.target.value })}
-            className="bg-[#101415] border border-[#1E5128] rounded-xl p-3 text-white"
+            className="bg-[slate-950] border border-[slate-800] rounded-xl p-3 text-white"
           />
         </div>
       </GlassCard>
@@ -267,7 +270,7 @@ export default function PatientProfile() {
           <button
             type="button"
             onClick={addHistory}
-            className="text-sm text-[#86db70] hover:underline"
+            className="text-sm text-[teal-400] hover:underline"
           >
             + Add condition
           </button>
@@ -276,7 +279,7 @@ export default function PatientProfile() {
           {medicalHistory.map((entry, i) => (
             <div
               key={i}
-              className="grid grid-cols-1 md:grid-cols-4 gap-3 rounded-xl border border-[#1E5128] p-4 bg-[#1d2022]"
+              className="grid grid-cols-1 md:grid-cols-4 gap-3 rounded-xl border border-[slate-800] p-4 bg-[slate-950]"
             >
               <input
                 placeholder="Condition"
@@ -286,7 +289,7 @@ export default function PatientProfile() {
                   next[i] = { ...entry, condition: e.target.value };
                   setMedicalHistory(next);
                 }}
-                className="bg-[#101415] border border-[#1E5128] rounded-lg p-2 text-white text-sm"
+                className="bg-[slate-950] border border-[slate-800] rounded-lg p-2 text-white text-sm"
               />
               <input
                 type="date"
@@ -296,7 +299,7 @@ export default function PatientProfile() {
                   next[i] = { ...entry, diagnosedDate: e.target.value };
                   setMedicalHistory(next);
                 }}
-                className="bg-[#101415] border border-[#1E5128] rounded-lg p-2 text-white text-sm"
+                className="bg-[slate-950] border border-[slate-800] rounded-lg p-2 text-white text-sm"
               />
               <select
                 value={entry.status}
@@ -308,7 +311,7 @@ export default function PatientProfile() {
                   };
                   setMedicalHistory(next);
                 }}
-                className="bg-[#101415] border border-[#1E5128] rounded-lg p-2 text-white text-sm"
+                className="bg-[slate-950] border border-[slate-800] rounded-lg p-2 text-white text-sm"
               >
                 <option value="active">Active</option>
                 <option value="chronic">Chronic</option>
@@ -334,7 +337,7 @@ export default function PatientProfile() {
           <button
             type="button"
             onClick={addMedication}
-            className="text-sm text-[#86db70] hover:underline"
+            className="text-sm text-[teal-400] hover:underline"
           >
             + Add medication
           </button>
@@ -343,7 +346,7 @@ export default function PatientProfile() {
           {medications.map((med, i) => (
             <div
               key={i}
-              className="grid grid-cols-1 md:grid-cols-5 gap-3 rounded-xl border border-[#1E5128] p-4 bg-[#1d2022]"
+              className="grid grid-cols-1 md:grid-cols-5 gap-3 rounded-xl border border-[slate-800] p-4 bg-[slate-950]"
             >
               <input
                 placeholder="Name"
@@ -353,7 +356,7 @@ export default function PatientProfile() {
                   next[i] = { ...med, name: e.target.value };
                   setMedications(next);
                 }}
-                className="bg-[#101415] border border-[#1E5128] rounded-lg p-2 text-white text-sm"
+                className="bg-[slate-950] border border-[slate-800] rounded-lg p-2 text-white text-sm"
               />
               <input
                 placeholder="Dosage"
@@ -363,7 +366,7 @@ export default function PatientProfile() {
                   next[i] = { ...med, dosage: e.target.value };
                   setMedications(next);
                 }}
-                className="bg-[#101415] border border-[#1E5128] rounded-lg p-2 text-white text-sm"
+                className="bg-[slate-950] border border-[slate-800] rounded-lg p-2 text-white text-sm"
               />
               <input
                 placeholder="Frequency"
@@ -373,7 +376,7 @@ export default function PatientProfile() {
                   next[i] = { ...med, frequency: e.target.value };
                   setMedications(next);
                 }}
-                className="bg-[#101415] border border-[#1E5128] rounded-lg p-2 text-white text-sm"
+                className="bg-[slate-950] border border-[slate-800] rounded-lg p-2 text-white text-sm"
               />
               <input
                 placeholder="Prescribed by"
@@ -383,7 +386,7 @@ export default function PatientProfile() {
                   next[i] = { ...med, prescribedBy: e.target.value };
                   setMedications(next);
                 }}
-                className="bg-[#101415] border border-[#1E5128] rounded-lg p-2 text-white text-sm"
+                className="bg-[slate-950] border border-[slate-800] rounded-lg p-2 text-white text-sm"
               />
               <button
                 type="button"
@@ -406,15 +409,15 @@ export default function PatientProfile() {
             {record.doctorNotes.map((note, i) => (
               <div
                 key={note._id ?? i}
-                className="rounded-xl border border-[#1E5128] bg-[#1d2022] p-4"
+                className="rounded-xl border border-[slate-800] bg-[slate-950] p-4"
               >
-                <p className="text-xs text-[#86db70]">
+                <p className="text-xs text-[teal-400]">
                   {note.doctorName ?? "Doctor"} ·{" "}
                   {note.createdAt
                     ? new Date(note.createdAt).toLocaleDateString()
                     : ""}
                 </p>
-                <p className="text-sm text-[#e0e3e5] mt-2">{note.note}</p>
+                <p className="text-sm text-[slate-200] mt-2">{note.note}</p>
               </div>
             ))}
           </div>
@@ -424,7 +427,7 @@ export default function PatientProfile() {
       <button
         type="submit"
         disabled={saving}
-        className="w-full md:w-auto px-8 py-3 rounded-xl bg-[#86db70] text-black font-bold disabled:opacity-50"
+        className="w-full md:w-auto px-8 py-3 rounded-xl bg-teal-500 text-white font-bold disabled:opacity-50 hover:bg-teal-400 transition"
       >
         {saving ? "Saving..." : record ? "Save Changes" : "Create Profile"}
       </button>

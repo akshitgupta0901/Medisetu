@@ -45,7 +45,7 @@ export default function MedicalRecordSummary() {
 
         <div className="flex items-start justify-between gap-4">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#5eead4]">
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-teal-400">
               Medical record
             </p>
             <h2 className="mt-2 text-2xl font-semibold text-[#f8fafc]">
@@ -53,22 +53,22 @@ export default function MedicalRecordSummary() {
             </h2>
           </div>
           {record && (
-            <span className="rounded-full border border-[#86db70]/30 bg-[#86db70]/10 px-3 py-1 text-xs font-semibold text-[#86db70]">
+            <span className="rounded-full border border-[teal-400]/30 bg-[teal-400]/10 px-3 py-1 text-xs font-semibold text-[teal-400]">
               {record.bloodGroup}
             </span>
           )}
         </div>
 
         {loading ? (
-          <p className="mt-4 text-sm text-[#c5c6cd]">Fetching health data...</p>
+          <p className="mt-4 text-sm text-[slate-400]">Fetching health data...</p>
         ) : !record ? (
           <div className="mt-5">
-            <p className="text-sm text-[#c5c6cd] mb-4">
+            <p className="text-sm text-[slate-400] mb-4">
               Create your medical profile to track allergies, medications, and history.
             </p>
             <Link
               href="/patient/profile"
-              className="inline-block bg-[#86db70] text-black px-5 py-2.5 rounded-xl font-semibold text-sm"
+              className="inline-block bg-[teal-400] text-black px-5 py-2.5 rounded-xl font-semibold text-sm"
             >
               Create Profile
             </Link>
@@ -84,11 +84,11 @@ export default function MedicalRecordSummary() {
               </div>
               <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-3">
                 <p className="text-[11px] uppercase text-[#94a3b8]">Medications</p>
-                <p className="mt-1 text-sm font-semibold text-[#5eead4]">{medCount}</p>
+                <p className="mt-1 text-sm font-semibold text-teal-400">{medCount}</p>
               </div>
               <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-3">
                 <p className="text-[11px] uppercase text-[#94a3b8]">History</p>
-                <p className="mt-1 text-sm font-semibold text-[#93c5fd]">{historyCount}</p>
+                <p className="mt-1 text-sm font-semibold text-blue-400">{historyCount}</p>
               </div>
             </div>
 
@@ -103,7 +103,7 @@ export default function MedicalRecordSummary() {
 
             <Link
               href="/patient/profile"
-              className="mt-4 inline-block text-sm text-[#86db70] hover:underline"
+              className="mt-4 inline-block text-sm text-[teal-400] hover:underline"
             >
               View full profile →
             </Link>

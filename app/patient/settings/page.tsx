@@ -5,6 +5,7 @@ import Sidebar from "@/components/patient/sidebar";
 import Topbar from "@/components/patient/topbar";
 import MobileBottomNav from "@/components/patient/mobilebottomnav";
 import GlassCard from "@/components/patient/glasscard";
+import NotificationSettings from "@/components/patient/notification-settings";
 import { User, Lock, Bell, Shield, Loader2, Save, Trash2 } from "lucide-react";
 import { useAuth } from "@/contexts/auth-context";
 
@@ -241,23 +242,7 @@ export default function PatientSettingsPage() {
               {activeTab === "notifications" && (
                 <GlassCard className="p-6 md:p-8">
                   <h3 className="text-xl font-bold text-white mb-6">Notification Preferences</h3>
-                  <div className="space-y-6">
-                    {[
-                      { id: "email", label: "Email Notifications", desc: "Receive appointment reminders via email" },
-                      { id: "sms", label: "SMS Alerts", desc: "Get critical alerts on your mobile phone" },
-                      { id: "browser", label: "Browser Notifications", desc: "Stay updated with real-time push alerts" }
-                    ].map((pref) => (
-                      <div key={pref.id} className="flex items-center justify-between">
-                        <div>
-                          <p className="font-bold text-white">{pref.label}</p>
-                          <p className="text-xs text-[#c5c6cd]">{pref.desc}</p>
-                        </div>
-                        <div className="w-12 h-6 bg-[#323537] rounded-full relative cursor-pointer border border-[#1E5128]">
-                          <div className="absolute left-1 top-1 w-4 h-4 bg-[#86db70] rounded-full shadow-lg" />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                  <NotificationSettings />
                 </GlassCard>
               )}
 

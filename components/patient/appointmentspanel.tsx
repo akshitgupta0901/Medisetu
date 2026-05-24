@@ -130,14 +130,14 @@ export default function AppointmentsPanel() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>
           <h2 className="text-2xl font-bold text-white">My Appointments</h2>
-          <p className="text-sm text-[#86db70]/80 mt-1">
+          <p className="text-sm text-teal-300/80 mt-1">
             {upcoming.length} upcoming · {appointments.length} total
           </p>
         </div>
         <button
           type="button"
           onClick={() => setShowForm(!showForm)}
-          className="px-4 py-2 rounded-xl bg-[#86db70] text-black font-semibold hover:shadow-[0_0_20px_rgba(134,219,112,0.3)] transition text-sm"
+          className="px-4 py-2 rounded-xl bg-teal-300 text-slate-950 font-bold shadow-lg shadow-teal-500/15 hover:bg-teal-200 hover:shadow-teal-400/25 transition text-sm"
         >
           {showForm ? "Close" : "+ Book Appointment"}
         </button>
@@ -149,7 +149,7 @@ export default function AppointmentsPanel() {
         </div>
       )}
       {success && (
-        <div className="mb-4 rounded-xl border border-[#1E5128] bg-[#86db70]/10 px-4 py-3 text-sm text-[#86db70]">
+        <div className="mb-4 rounded-xl border border-slate-800 bg-teal-400/10 px-4 py-3 text-sm text-teal-300">
           {success}
         </div>
       )}
@@ -157,7 +157,7 @@ export default function AppointmentsPanel() {
       {showForm && (
         <form
           onSubmit={handleSubmit}
-          className="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4 rounded-2xl border border-[#1E5128] bg-[#1d2022] p-5"
+          className="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4 rounded-2xl border border-slate-800 bg-slate-950 p-5"
         >
           <div className="md:col-span-2">
             <label className="text-xs text-slate-400 uppercase">Doctor</label>
@@ -165,7 +165,7 @@ export default function AppointmentsPanel() {
               value={doctorId}
               onChange={(e) => setDoctorId(e.target.value)}
               required
-              className="mt-1 w-full bg-[#101415] border border-[#1E5128] rounded-xl p-3 text-white"
+              className="mt-1 w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white"
             >
               {doctors.map((d) => (
                 <option key={d._id} value={d._id}>
@@ -183,7 +183,7 @@ export default function AppointmentsPanel() {
               required
               min={getMinBookingDateString()}
               max={getMaxBookingDateString()}
-              className="mt-1 w-full bg-[#101415] border border-[#1E5128] rounded-xl p-3 text-white"
+              className="mt-1 w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white"
             />
             <p className="mt-1 text-xs text-slate-500">
               Book up to 60 days in advance
@@ -196,7 +196,7 @@ export default function AppointmentsPanel() {
               value={time}
               onChange={(e) => setTime(e.target.value)}
               required
-              className="mt-1 w-full bg-[#101415] border border-[#1E5128] rounded-xl p-3 text-white"
+              className="mt-1 w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white"
             />
           </div>
           <div>
@@ -205,7 +205,7 @@ export default function AppointmentsPanel() {
               type="text"
               value={department}
               onChange={(e) => setDepartment(e.target.value)}
-              className="mt-1 w-full bg-[#101415] border border-[#1E5128] rounded-xl p-3 text-white"
+              className="mt-1 w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white"
             />
           </div>
           <div>
@@ -213,7 +213,7 @@ export default function AppointmentsPanel() {
             <select
               value={type}
               onChange={(e) => setType(e.target.value as "in-person" | "telehealth")}
-              className="mt-1 w-full bg-[#101415] border border-[#1E5128] rounded-xl p-3 text-white"
+              className="mt-1 w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white"
             >
               <option value="telehealth">Telehealth</option>
               <option value="in-person">In-person</option>
@@ -227,14 +227,14 @@ export default function AppointmentsPanel() {
               required
               rows={2}
               placeholder="Describe your symptoms or reason..."
-              className="mt-1 w-full bg-[#101415] border border-[#1E5128] rounded-xl p-3 text-white resize-none"
+              className="mt-1 w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white resize-none"
             />
           </div>
           <div className="md:col-span-2">
             <button
               type="submit"
               disabled={submitting || doctors.length === 0}
-              className="w-full py-3 rounded-xl bg-[#86db70] text-black font-bold disabled:opacity-50"
+              className="w-full py-3 rounded-xl bg-teal-300 text-slate-950 font-bold shadow-lg shadow-teal-500/15 transition hover:bg-teal-200 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {submitting ? "Booking..." : "Confirm Booking"}
             </button>

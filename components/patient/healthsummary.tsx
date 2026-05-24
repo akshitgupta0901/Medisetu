@@ -4,9 +4,9 @@ import { motion } from "framer-motion";
 import GlassCard from "./glasscard";
 
 const summaryItems = [
-  { label: "Vitals", value: "Stable", tone: "text-[#5eead4]" },
-  { label: "Risk", value: "Low", tone: "text-[#a5f3fc]" },
-  { label: "Trend", value: "+4%", tone: "text-[#93c5fd]" },
+  { label: "Vitals", value: "Stable", tone: "text-teal-400" },
+  { label: "Risk", value: "Low", tone: "text-cyan-400" },
+  { label: "Trend", value: "+4%", tone: "text-blue-400" },
 ];
 
 export default function HealthSummary() {
@@ -23,7 +23,7 @@ export default function HealthSummary() {
 
         <div className="flex items-start justify-between gap-4">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#5eead4]">
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-teal-400">
               Health summary
             </p>
             <h2 className="mt-2 text-2xl font-semibold tracking-tight text-[#f8fafc]">
@@ -31,7 +31,7 @@ export default function HealthSummary() {
             </h2>
           </div>
 
-          <span className="rounded-full border border-[#5eead4]/20 bg-[#5eead4]/10 px-3 py-1 text-xs font-semibold text-[#99f6e4]">
+          <span className="rounded-full border border-[#5eead4]/20 bg-teal-400/10 px-3 py-1 text-xs font-semibold text-[#99f6e4]">
             82%
           </span>
         </div>
@@ -76,7 +76,7 @@ export default function HealthSummary() {
           ))}
         </div>
 
-        <div className="mt-4 rounded-2xl border border-[#67e8f9]/15 bg-[#67e8f9]/[0.045] p-4">
+        <div className="mt-4 rounded-2xl border border-[#67e8f9]/15 bg-cyan-400/[0.045] p-4">
           <p className="text-sm leading-5 text-[#cbd5e1]">
             Vitals have remained consistent across the last 24 hours.
           </p>

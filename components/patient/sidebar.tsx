@@ -20,37 +20,37 @@ export default function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="hidden lg:flex fixed left-0 top-0 h-screen w-72 bg-[#1d2022] border-r border-[#1E5128] flex-col z-50">
-      <div className="p-8">
-        <h1 className="text-3xl font-bold text-[#86db70]">MediSetu AI</h1>
-        <p className="text-xs uppercase tracking-widest text-[#c5c6cd] mt-2">
-          Clinical Excellence
+    <aside className="hidden lg:flex fixed left-0 top-0 h-screen w-60 bg-slate-950 border-r border-slate-800 flex-col z-50">
+      <div className="p-6 border-b border-slate-800">
+        <h1 className="text-2xl font-bold text-teal-400">MediSetu AI</h1>
+        <p className="text-xs text-slate-500 mt-1 uppercase tracking-wider">
+          Patient Portal
         </p>
+
+        <div className="mt-6">
+          <SidebarUserCard />
+        </div>
       </div>
 
-      <nav className="px-6 space-y-2 flex-1 overflow-y-auto">
+      <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
         {navItems.map((item) => (
           <Link
             key={item.label}
             href={item.href}
-            className={`block px-4 py-3 rounded-xl transition ${
+            className={`block rounded-lg px-4 py-3 text-sm transition ${
               pathname === item.href
-                ? "bg-[#0b6302] text-[#89de73]"
-                : "text-[#c5c6cd] hover:bg-[#323537]"
+                ? "bg-teal-500/15 text-teal-400 border border-teal-500/20"
+                : "text-slate-300 hover:bg-slate-800 hover:text-teal-400"
             }`}
           >
             {item.label}
           </Link>
         ))}
 
-        <div className="pt-4 mt-4 border-t border-[#1E5128]">
+        <div className="pt-4 mt-4 border-t border-slate-800">
           <LogoutButton />
         </div>
       </nav>
-
-      <div className="mt-auto p-8 border-t border-[#1E5128]">
-        <SidebarUserCard variant="green" />
-      </div>
     </aside>
   );
 }

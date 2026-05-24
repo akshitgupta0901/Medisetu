@@ -4,11 +4,10 @@ import { useState } from "react";
 import Sidebar from "@/components/doctor/sidebar";
 import TopBar from "@/components/doctor/topbar";
 import DoctorProfileEditor from "@/components/doctor/doctor-profile-editor";
-import { User, Lock, Bell, Shield, Loader2, Save, Trash2, Calendar } from "lucide-react";
-import { useAuth } from "@/contexts/auth-context";
+import NotificationSettings from "@/components/patient/notification-settings";
+import { User, Lock, Bell, Loader2 } from "lucide-react";
 
 export default function DoctorSettingsPage() {
-  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState("professional");
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState({ type: "", text: "" });
@@ -157,23 +156,7 @@ export default function DoctorSettingsPage() {
                 {activeTab === "notifications" && (
                   <div className="bg-slate-900 border border-slate-800 rounded-3xl p-8">
                     <h3 className="text-xl font-bold text-white mb-6">Clinical Alerts</h3>
-                    <div className="space-y-6">
-                      {[
-                        { id: "app", label: "New Appointment Requests", desc: "Get notified when a patient books a new slot" },
-                        { id: "msg", label: "Patient Messages", desc: "Receive alerts for new secure communications" },
-                        { id: "rep", label: "AI Report Updates", desc: "Notification when a critical AI triage is generated" }
-                      ].map((pref) => (
-                        <div key={pref.id} className="flex items-center justify-between p-4 bg-slate-950 border border-slate-800 rounded-2xl">
-                          <div>
-                            <p className="font-bold text-white">{pref.label}</p>
-                            <p className="text-xs text-slate-500 mt-1">{pref.desc}</p>
-                          </div>
-                          <div className="w-12 h-6 bg-slate-800 rounded-full relative cursor-pointer border border-teal-500/20">
-                            <div className="absolute right-1 top-1 w-4 h-4 bg-teal-400 rounded-full shadow-lg" />
-                          </div>
-                        </div>
-                      ))}
-                    </div>
+                    <NotificationSettings />
                   </div>
                 )}
               </div>

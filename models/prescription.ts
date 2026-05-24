@@ -3,6 +3,7 @@ import mongoose, { Document, Model, Types } from "mongoose";
 export interface IPrescription extends Document {
   patientId: Types.ObjectId;
   doctorId: Types.ObjectId;
+  appointmentId?: Types.ObjectId;
   medications: {
     name: string;
     dosage: string;
@@ -27,6 +28,10 @@ const PrescriptionSchema = new mongoose.Schema<IPrescription>(
       ref: "User",
       required: true,
     },
+    appointmentId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Appointment",
+    },
     medications: [
       {
         name: { type: String, required: true },
@@ -43,8 +48,17 @@ const PrescriptionSchema = new mongoose.Schema<IPrescription>(
 
 PrescriptionSchema.index({ patientId: 1, createdAt: -1 });
 PrescriptionSchema.index({ doctorId: 1, createdAt: -1 });
+PrescriptionSchema.index({ appointmentId: 1 });
+
+if (
+  mongoose.models.Prescription &&
+  !mongoose.models.Prescription.schema.path("appointmentId")
+) {
+  delete mongoose.models.Prescription;
+}
 
 const Prescription: Model<IPrescription> =
-  mongoose.models.Prescription || mongoose.model<IPrescription>("Prescription", PrescriptionSchema);
+  mongoose.models.Prescription ||
+  mongoose.model<IPrescription>("Prescription", PrescriptionSchema);
 
 export default Prescription;

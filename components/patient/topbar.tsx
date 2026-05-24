@@ -8,12 +8,17 @@ export default function Topbar() {
   const { user } = useAuth();
 
   return (
-    <header className="fixed top-0 right-0 w-full lg:w-[calc(100%-18rem)] h-20 bg-[#101415]/80 backdrop-blur-xl border-b border-[#1E5128] flex items-center justify-between px-4 lg:px-10 z-40">
-      <h2 className="text-xl md:text-2xl font-bold text-[#bac7e1] truncate">
-        {user ? getWelcomeMessage(user) : "Patient Dashboard"}
-      </h2>
+    <header className="sticky top-0 z-30 backdrop-blur-xl bg-slate-950/80 border-b border-slate-800">
+      <div className="px-6 py-4 flex justify-between items-center">
+        <div>
+          <h2 className="text-2xl font-bold text-white">
+            {user ? getWelcomeMessage(user) : "Welcome"}
+          </h2>
+          <p className="text-slate-400 text-sm">
+            {user?.email ?? "Patient Portal"}
+          </p>
+        </div>
 
-      <div className="flex items-center gap-4">
         <NotificationBell />
       </div>
     </header>

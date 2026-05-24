@@ -9,6 +9,7 @@ export interface IUser extends Document {
   specialization?: string;
   profileImage?: string;
   isSuspended: boolean;
+  notificationPrefs?: { email: boolean; sms: boolean; browser: boolean };
   createdAt: Date;
   updatedAt: Date;
 }
@@ -32,9 +33,21 @@ const UserSchema = new mongoose.Schema<IUser>(
     specialization: { type: String },
     profileImage: { type: String },
     isSuspended: { type: Boolean, default: false },
+    notificationPrefs: {
+      email: { type: Boolean, default: false },
+      sms: { type: Boolean, default: false },
+      browser: { type: Boolean, default: false },
+    },
   },
   { timestamps: true }
 );
+
+if (
+  mongoose.models.User &&
+  !mongoose.models.User.schema.path("notificationPrefs.email")
+) {
+  delete mongoose.models.User;
+}
 
 const User: Model<IUser> =
   mongoose.models.User || mongoose.model<IUser>("User", UserSchema);

@@ -14,7 +14,11 @@ export default function UserManagementPage() {
   const fetchUsers = async () => {
     setIsLoading(true);
     try {
-      const res = await fetch(`/api/admin/users?search=${search}&role=${roleFilter}`);
+      const query = new URLSearchParams();
+      if (search) query.append("search", search);
+      if (roleFilter) query.append("role", roleFilter);
+      
+      const res = await fetch(`/api/admin/users?${query.toString()}`);
       const data = await res.json();
       if (data.success) {
         setUsers(data.users);

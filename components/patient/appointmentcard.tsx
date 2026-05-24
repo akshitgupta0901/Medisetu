@@ -40,7 +40,7 @@ export default function AppointmentCard() {
     return (
       <GlassCard className="md:col-span-5 p-8 flex flex-col">
         <h2 className="text-2xl font-bold mb-4">Your Next Appointment</h2>
-        <p className="text-[#c5c6cd] text-sm">Loading...</p>
+        <p className="text-slate-400 text-sm">Loading...</p>
       </GlassCard>
     );
   }
@@ -49,10 +49,10 @@ export default function AppointmentCard() {
     return (
       <GlassCard className="md:col-span-5 p-8 flex flex-col">
         <h2 className="text-2xl font-bold mb-4">Your Next Appointment</h2>
-        <p className="text-[#c5c6cd] text-sm mb-4">No upcoming visits scheduled.</p>
+        <p className="text-slate-400 text-sm mb-4">No upcoming visits scheduled.</p>
         <a
           href="#appointments"
-          className="mt-auto bg-[#86db70] text-black py-4 rounded-xl font-bold text-center hover:shadow-[0_0_20px_rgba(134,219,112,0.3)] transition"
+          className="mt-auto bg-teal-300 text-slate-950 py-4 rounded-xl font-bold text-center shadow-lg shadow-teal-500/15 transition hover:bg-teal-200 hover:shadow-teal-400/25"
         >
           Book Appointment
         </a>
@@ -68,29 +68,29 @@ export default function AppointmentCard() {
       </div>
 
       <div className="flex items-center gap-4 mb-6">
-        <div className="w-14 h-14 rounded-full bg-[#86db70]/20 flex items-center justify-center text-2xl">
+        <div className="w-14 h-14 rounded-full bg-teal-400/20 flex items-center justify-center text-2xl">
           👨‍⚕️
         </div>
         <div>
           <h3 className="font-bold text-lg">
             {nextAppt.doctor?.name ?? "Assigned Doctor"}
           </h3>
-          <p className="text-[#86db70] text-sm">{nextAppt.department}</p>
+          <p className="text-teal-300 text-sm">{nextAppt.department}</p>
         </div>
       </div>
 
-      <div className="bg-[#1d2022] border border-[#1E5128] rounded-2xl p-5 mb-6">
+      <div className="bg-slate-950 border border-slate-800 rounded-2xl p-5 mb-6">
         <p className="font-semibold">
           {nextAppt.date} at {nextAppt.time}
         </p>
-        <p className="text-sm text-[#c5c6cd] mt-2 capitalize">
+        <p className="text-sm text-slate-400 mt-2 capitalize">
           {nextAppt.type.replace("-", " ")} · {nextAppt.reason}
         </p>
       </div>
 
       <a
         href="#appointments"
-        className="mt-auto bg-[#86db70] text-black py-4 rounded-xl font-bold text-center hover:shadow-[0_0_20px_rgba(134,219,112,0.3)] transition"
+        className="mt-auto bg-teal-300 text-slate-950 py-4 rounded-xl font-bold text-center shadow-lg shadow-teal-500/15 transition hover:bg-teal-200 hover:shadow-teal-400/25"
       >
         Manage Appointments
       </a>
