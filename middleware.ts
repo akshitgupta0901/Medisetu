@@ -80,6 +80,8 @@ export async function middleware(request: NextRequest) {
     );
   }
 
+  console.log("MIDDLEWARE PAYLOAD:", payload);
+  console.log("MIDDLEWARE ROLE:", payload.role);
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set("x-user-id", payload.userId);
   requestHeaders.set("x-user-email", payload.email);
@@ -93,6 +95,7 @@ export async function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     "/admin/:path*",
+    "/api/admin/:path*",
     "/doctor/:path*",
     "/patient/:path*",
     "/prescriptions/:path*",
