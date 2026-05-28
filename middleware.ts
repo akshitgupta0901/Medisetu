@@ -53,9 +53,8 @@ export async function middleware(request: NextRequest) {
   // CUSTOM JWT TOKEN
   const customToken = getTokenFromRequest(request);
 
-  const token = customToken || nextAuthToken;
+  const token = nextAuthToken || customToken;
 
-  console.log(`Middleware path: ${pathname}, hasNextAuth: ${!!nextAuthToken}, hasCustom: ${!!customToken}`);
 
   // NOT LOGGED IN
   if (!token) {
@@ -65,13 +64,13 @@ export async function middleware(request: NextRequest) {
   }
 
   // IF NEXTAUTH SESSION EXISTS
-  if (nextAuthToken) {
+  if (nextAuthToken && !customToken) {
     const role = (nextAuthToken.role as UserRole) || "patient";
-    console.log(`NextAuth user role: ${role}, allowed: ${allowedRoles}`);
 
+  
     // ROLE CHECK FOR NEXTAUTH
     if (!allowedRoles.includes(role)) {
-      console.log(`Unauthorized: role ${role} not in ${allowedRoles}`);
+      
       const loginUrl = new URL("/login", request.url);
       loginUrl.searchParams.set("error", "unauthorized");
       return NextResponse.redirect(loginUrl);

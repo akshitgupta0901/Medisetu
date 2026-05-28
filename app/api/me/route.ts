@@ -6,9 +6,11 @@ import { requireAuth } from "@/lib/api-auth";
 import { toSafeUser } from "@/lib/auth";
 import type { MeSuccessResponse, AuthErrorResponse } from "@/types/auth";
 
+
 export async function GET(req: Request) {
   try {
     const auth = await requireAuth(req);
+    
     if (auth instanceof NextResponse) return auth;
 
     await connectDB();
@@ -16,6 +18,7 @@ export async function GET(req: Request) {
     const user = await User.findById(auth.userId).select(
       "name email role specialization profileImage createdAt updatedAt"
     );
+
 
     if (!user) {
       return NextResponse.json<AuthErrorResponse>(

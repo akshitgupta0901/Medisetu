@@ -9,10 +9,14 @@ import {
   useState,
   type ReactNode,
 } from "react";
+
 import { useRouter } from "next/navigation";
 import { useSession, signOut as nextAuthSignOut } from "next-auth/react";
+
 import type { SafeUser, UserRole } from "@/types/auth";
+
 import { authFetch } from "@/lib/fetch-auth";
+
 import {
   TOKEN_COOKIE_NAME,
   USER_STORAGE_KEY,
@@ -24,7 +28,7 @@ interface AuthContextValue {
   loading: boolean;
   isAuthenticated: boolean;
   refetch: () => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
   setUser: (user: SafeUser | null) => void;
 }
 
@@ -32,48 +36,57 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 
 function readStoredUser(): SafeUser | null {
   if (typeof window === "undefined") return null;
+
   try {
     const raw = localStorage.getItem(USER_STORAGE_KEY);
+
     if (!raw) return null;
+
     return JSON.parse(raw) as SafeUser;
   } catch {
     return null;
   }
 }
 
-export function AuthProvider({ children }: { children: ReactNode }) {
-  const { data: session, status: sessionStatus } = useSession();
+export function AuthProvider({
+  children,
+}: {
+  children: ReactNode;
+}) {
+  const { status: sessionStatus } = useSession();
+
   const [user, setUser] = useState<SafeUser | null>(null);
+
   const [loading, setLoading] = useState(true);
 
   const persistUser = useCallback((next: SafeUser | null) => {
     setUser(next);
+
     if (next) {
-      localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(next));
+      localStorage.setItem(
+        USER_STORAGE_KEY,
+        JSON.stringify(next)
+      );
     } else {
       localStorage.removeItem(USER_STORAGE_KEY);
-      localStorage.removeItem(TOKEN_STORAGE_KEY);
-      document.cookie = `${TOKEN_COOKIE_NAME}=; path=/; max-age=0`;
     }
   }, []);
 
   const refetch = useCallback(async () => {
-    const hasCustomToken = !!localStorage.getItem(TOKEN_STORAGE_KEY);
-    const hasNextAuthSession = sessionStatus === "authenticated";
-
-    if (!hasCustomToken && !hasNextAuthSession) {
-      persistUser(null);
-      return;
-    }
-
-    // Clear stale custom token if NextAuth is taking over
-    if (hasNextAuthSession && hasCustomToken) {
-      localStorage.removeItem(TOKEN_STORAGE_KEY);
-      document.cookie = `${TOKEN_COOKIE_NAME}=; path=/; max-age=0`;
-    }
-
     try {
+      const hasCustomToken =
+        !!localStorage.getItem(TOKEN_STORAGE_KEY);
+
+      const hasNextAuthSession =
+        sessionStatus === "authenticated";
+
+      if (!hasCustomToken && !hasNextAuthSession) {
+        persistUser(null);
+        return;
+      }
+
       const res = await authFetch("/api/me");
+
       const data = await res.json();
 
       if (res.ok && data.success) {
@@ -82,26 +95,48 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         persistUser(null);
       }
     } catch (error) {
-      console.error("Refetch error:", error);
+      console.error("Auth refetch error:", error);
+
       persistUser(null);
     }
   }, [persistUser, sessionStatus]);
 
   useEffect(() => {
-    if (sessionStatus === "loading") return;
+    if (sessionStatus === "loading") {
+      return;
+    }
 
     const stored = readStoredUser();
-    if (stored) setUser(stored);
 
-    refetch().finally(() => setLoading(false));
+    if (stored) {
+      setUser(stored);
+    }
+
+    refetch().finally(() => {
+      setLoading(false);
+    });
   }, [refetch, sessionStatus]);
 
   const logout = useCallback(async () => {
-    persistUser(null);
+    // CLEAR LOCAL USER
+    localStorage.removeItem(USER_STORAGE_KEY);
+
+    // CLEAR CUSTOM TOKEN
+    localStorage.removeItem(TOKEN_STORAGE_KEY);
+
+    // CLEAR COOKIE
+    document.cookie = `${TOKEN_COOKIE_NAME}=; path=/; max-age=0`;
+
+    // CLEAR STATE
+    setUser(null);
+
+    // NEXTAUTH LOGOUT
     if (sessionStatus === "authenticated") {
-      await nextAuthSignOut({ redirect: false });
+      await nextAuthSignOut({
+        redirect: false,
+      });
     }
-  }, [persistUser, sessionStatus]);
+  }, [sessionStatus]);
 
   const value = useMemo(
     () => ({
@@ -115,19 +150,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [user, loading, refetch, logout, persistUser]
   );
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={value}>
+      {children}
+    </AuthContext.Provider>
+  );
 }
 
 export function useAuth(): AuthContextValue {
   const ctx = useContext(AuthContext);
+
   if (!ctx) {
-    throw new Error("useAuth must be used within AuthProvider");
+    throw new Error(
+      "useAuth must be used within AuthProvider"
+    );
   }
+
   return ctx;
 }
 
-export function useRequireAuth(requiredRoles?: UserRole[]) {
+export function useRequireAuth(
+  requiredRoles?: UserRole[]
+) {
   const auth = useAuth();
+
   const router = useRouter();
 
   useEffect(() => {
@@ -135,15 +181,29 @@ export function useRequireAuth(requiredRoles?: UserRole[]) {
 
     if (!auth.user) {
       const redirect =
-        typeof window !== "undefined" ? window.location.pathname : "/";
-      router.replace(`/login?redirect=${encodeURIComponent(redirect)}`);
+        typeof window !== "undefined"
+          ? window.location.pathname
+          : "/";
+
+      router.replace(
+        `/login?redirect=${encodeURIComponent(redirect)}`
+      );
+
       return;
     }
 
-    if (requiredRoles && !requiredRoles.includes(auth.user.role)) {
+    if (
+      requiredRoles &&
+      !requiredRoles.includes(auth.user.role)
+    ) {
       router.replace("/login?error=unauthorized");
     }
-  }, [auth.loading, auth.user, requiredRoles, router]);
+  }, [
+    auth.loading,
+    auth.user,
+    requiredRoles,
+    router,
+  ]);
 
   return auth;
 }
