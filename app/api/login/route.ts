@@ -44,6 +44,13 @@ export async function POST(req: Request) {
       );
     }
 
+    if (!user.password) {
+      return NextResponse.json<AuthErrorResponse>(
+        { success: false, message: "Please sign in with Google" },
+        { status: 401 }
+      );
+    }
+
     const isPasswordValid = await bcrypt.compare(password, user.password);
 
     if (!isPasswordValid) {

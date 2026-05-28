@@ -34,6 +34,11 @@ export async function GET(req: Request) {
     let query: Record<string, unknown> = {};
 
     if (auth.role === "patient") {
+      const existingPatient = await Patient.findOne({ userId: auth.userId });
+      if (!existingPatient) {
+        console.warn(`[AUTO-RECOVERY] Missing patient document for user ${auth.userId}. Creating one now...`);
+        await Patient.create({ userId: auth.userId });
+      }
       query = { userId: auth.userId };
     } else if (auth.role === "doctor" || auth.role === "admin") {
       if (userIdParam) {

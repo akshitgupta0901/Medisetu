@@ -8,6 +8,7 @@ import { usePathname } from "next/navigation";
 const navItems = [
   { label: "Dashboard", href: "/admin" },
   { label: "User Management", href: "/admin/users" },
+  { label: "Doctor Verifications", href: "/admin/doctor-verifications" },
   { label: "Doctors", href: "/admin/users?role=doctor" },
   { label: "Patients", href: "/admin/users?role=patient" },
   { label: "Appointments", href: "/admin/appointments" },

@@ -15,6 +15,7 @@ export interface SafeUser {
   name: string;
   email: string;
   role: UserRole;
+  isVerified?: boolean;
   specialization?: string;
   profileImage?: string;
   createdAt?: string;

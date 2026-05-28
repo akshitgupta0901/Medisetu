@@ -1,8 +1,9 @@
+import { getToken } from "next-auth/jwt";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { verifyTokenEdge } from "@/lib/auth-edge";
 import { TOKEN_COOKIE_NAME } from "@/lib/constants";
-import type { TokenPayload, UserRole } from "@/types/auth";
+import type { UserRole } from "@/types/auth";
 
 const ROUTE_PERMISSIONS: Record<string, UserRole[]> = {
   "/admin": ["admin"],
@@ -16,6 +17,7 @@ const ROUTE_PERMISSIONS: Record<string, UserRole[]> = {
 
 function getTokenFromRequest(request: NextRequest): string | null {
   const authHeader = request.headers.get("authorization");
+
   if (authHeader?.startsWith("Bearer ")) {
     return authHeader.slice(7);
   }
@@ -29,66 +31,130 @@ function getAllowedRoles(pathname: string): UserRole[] | null {
       return roles;
     }
   }
+
   return null;
 }
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
   const allowedRoles = getAllowedRoles(pathname);
 
   if (!allowedRoles) {
     return NextResponse.next();
   }
 
-  const token = getTokenFromRequest(request);
+  // NEXTAUTH TOKEN
+  const nextAuthToken = await getToken({
+    req: request,
+    secret: process.env.NEXTAUTH_SECRET,
+  });
 
+  // CUSTOM JWT TOKEN
+  const customToken = getTokenFromRequest(request);
+
+  const token = customToken || nextAuthToken;
+
+  console.log(`Middleware path: ${pathname}, hasNextAuth: ${!!nextAuthToken}, hasCustom: ${!!customToken}`);
+
+  // NOT LOGGED IN
   if (!token) {
     const loginUrl = new URL("/login", request.url);
     loginUrl.searchParams.set("redirect", pathname);
     return NextResponse.redirect(loginUrl);
   }
 
-  const payload = await verifyTokenEdge(token);
+  // IF NEXTAUTH SESSION EXISTS
+  if (nextAuthToken) {
+    const role = (nextAuthToken.role as UserRole) || "patient";
+    console.log(`NextAuth user role: ${role}, allowed: ${allowedRoles}`);
+
+    // ROLE CHECK FOR NEXTAUTH
+    if (!allowedRoles.includes(role)) {
+      console.log(`Unauthorized: role ${role} not in ${allowedRoles}`);
+      const loginUrl = new URL("/login", request.url);
+      loginUrl.searchParams.set("error", "unauthorized");
+      return NextResponse.redirect(loginUrl);
+    }
+
+    const requestHeaders = new Headers(request.headers);
+
+    requestHeaders.set(
+      "x-user-id",
+      String(nextAuthToken.userId || "")
+    );
+
+    requestHeaders.set(
+      "x-user-email",
+      String(nextAuthToken.email || "")
+    );
+
+    requestHeaders.set(
+      "x-user-role",
+      role
+    );
+
+    return NextResponse.next({
+      request: {
+        headers: requestHeaders,
+      },
+    });
+  }
+
+  // VERIFY CUSTOM JWT
+  const payload = await verifyTokenEdge(String(customToken));
 
   if (!payload) {
     const loginUrl = new URL("/login", request.url);
+
     loginUrl.searchParams.set("redirect", pathname);
     loginUrl.searchParams.set("error", "session_expired");
+
     const response = NextResponse.redirect(loginUrl);
+
     response.cookies.delete(TOKEN_COOKIE_NAME);
+
     return response;
   }
 
+  // ROLE CHECK
   if (!allowedRoles.includes(payload.role)) {
-    const acceptsHtml = request.headers.get("accept")?.includes("text/html");
+    const acceptsHtml = request.headers
+      .get("accept")
+      ?.includes("text/html");
 
     if (acceptsHtml) {
       const loginUrl = new URL("/login", request.url);
+
       loginUrl.searchParams.set("error", "unauthorized");
+
       return NextResponse.redirect(loginUrl);
     }
 
     return new NextResponse(
       JSON.stringify({
         success: false,
-        message: `Unauthorized. Required role not granted.`,
+        message: "Unauthorized",
       }),
       {
         status: 403,
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+        },
       }
     );
   }
 
-  console.log("MIDDLEWARE PAYLOAD:", payload);
-  console.log("MIDDLEWARE ROLE:", payload.role);
   const requestHeaders = new Headers(request.headers);
+
   requestHeaders.set("x-user-id", payload.userId);
   requestHeaders.set("x-user-email", payload.email);
   requestHeaders.set("x-user-role", payload.role);
 
   return NextResponse.next({
-    request: { headers: requestHeaders },
+    request: {
+      headers: requestHeaders,
+    },
   });
 }
 

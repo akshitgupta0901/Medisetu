@@ -36,7 +36,9 @@ export async function assignDoctorForTriage(
     "i"
   );
 
+  // Rule: Only select doctors where verificationStatus === "Approved"
   const doctorProfiles = await Doctor.find({
+    verificationStatus: "Approved",
     $or: [
       { specialization: specialtyRegex },
       { specialization: /general/i },
@@ -53,10 +55,15 @@ export async function assignDoctorForTriage(
     return String(pick.userId);
   }
 
-  const fallback = await User.findOne({ role: "doctor", isSuspended: { $ne: true } })
+  // Fallback Rule: Only select verified doctors even in fallback
+  const fallbackProfile = await Doctor.findOne({ verificationStatus: "Approved" }).select("userId").lean();
+  if (fallbackProfile) return String(fallbackProfile.userId);
+
+  // Final fallback (should ideally not be reached if platform has verified doctors)
+  const fallbackUser = await User.findOne({ role: "doctor", isSuspended: { $ne: true } })
     .select("_id")
     .lean();
-  return fallback ? String(fallback._id) : null;
+  return fallbackUser ? String(fallbackUser._id) : null;
 }
 
 export function initialStatus(severity: SeverityLevel): TriageReportStatus {

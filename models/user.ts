@@ -4,7 +4,7 @@ import type { UserRole } from "@/types/auth";
 export interface IUser extends Document {
   name: string;
   email: string;
-  password: string;
+  password?: string;
   role: UserRole;
   specialization?: string;
   profileImage?: string;
@@ -24,7 +24,7 @@ const UserSchema = new mongoose.Schema<IUser>(
       lowercase: true,
       trim: true,
     },
-    password: { type: String, required: true },
+    password: { type: String, required: false },
     role: {
       type: String,
       enum: ["doctor", "patient", "admin"],

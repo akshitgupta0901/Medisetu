@@ -36,8 +36,8 @@ function mapAppointmentToPatient(appt: SafeAppointment): ApprovedPrescriptionPat
     patientId: appt.patientId,
     name: appt.patient.name,
     email: appt.patient.email,
-    date: appt.date,
-    time: appt.time,
+    date: appt.appointmentDate || appt.date,
+    time: appt.appointmentTime || appt.time,
     department: appt.department,
     reason: appt.reason,
   };
@@ -64,7 +64,7 @@ export default function PrescriptionEditor({
     setError(null);
 
     try {
-      const res = await authFetch("/api/appointments?status=approved");
+      const res = await authFetch("/api/appointments?status=all");
       const data = await res.json();
 
       if (!res.ok || !data.success) {
@@ -75,6 +75,8 @@ export default function PrescriptionEditor({
 
       const uniquePatients = new Map<string, ApprovedPrescriptionPatient>();
       for (const appointment of data.appointments as SafeAppointment[]) {
+        if (appointment.status === "Cancelled") continue;
+        
         const patient = mapAppointmentToPatient(appointment);
         if (patient && !uniquePatients.has(patient.patientId)) {
           uniquePatients.set(patient.patientId, patient);

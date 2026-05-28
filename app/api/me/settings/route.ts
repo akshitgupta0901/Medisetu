@@ -25,6 +25,9 @@ export async function PATCH(req: Request) {
       if (!currentPassword) {
         return NextResponse.json({ success: false, message: "Current password is required to set a new one" }, { status: 400 });
       }
+      if (!user.password) {
+        return NextResponse.json({ success: false, message: "Account uses external sign-in, cannot change password here" }, { status: 400 });
+      }
       const isMatch = await bcrypt.compare(currentPassword, user.password);
       if (!isMatch) {
         return NextResponse.json({ success: false, message: "Incorrect current password" }, { status: 401 });
@@ -50,16 +53,24 @@ export async function DELETE(req: Request) {
     if (auth instanceof NextResponse) return auth;
 
     const { password } = await req.json();
-    if (!password) {
-      return NextResponse.json({ success: false, message: "Password is required to delete account" }, { status: 400 });
-    }
-
+    
     await connectDB();
     const user = await User.findById(auth.userId);
-    
-    const isMatch = await bcrypt.compare(password, user!.password);
-    if (!isMatch) {
-      return NextResponse.json({ success: false, message: "Incorrect password" }, { status: 401 });
+    if (!user) {
+      return NextResponse.json({ success: false, message: "User not found" }, { status: 404 });
+    }
+
+    if (user.password) {
+      if (!password) {
+        return NextResponse.json({ success: false, message: "Password is required to delete account" }, { status: 400 });
+      }
+      const isMatch = await bcrypt.compare(password, user.password);
+      if (!isMatch) {
+        return NextResponse.json({ success: false, message: "Incorrect password" }, { status: 401 });
+      }
+    } else {
+      // For Google users, we might still want to verify if they are authorized to delete.
+      // Assuming they are logged in, we let them delete without a password check.
     }
 
     // Handled in a separate logic if needed, but for now simple delete

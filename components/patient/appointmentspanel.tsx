@@ -6,10 +6,15 @@ import { authFetch } from "@/lib/fetch-auth";
 import type { SafeAppointment } from "@/types/appointment";
 import type { SafeUser } from "@/types/auth";
 import AppointmentItem from "@/components/appointments/appointmentitem";
+import type { AppointmentStatus } from "@/types/appointment";
 import {
   getMinBookingDateString,
   getMaxBookingDateString,
+  isUpcomingAppointmentStatus,
+  mapBookingTypeToAppointmentType,
 } from "@/lib/appointments";
+import Link from "next/link";
+import { Calendar } from "lucide-react";
 
 export default function AppointmentsPanel() {
   const [appointments, setAppointments] = useState<SafeAppointment[]>([]);
@@ -72,11 +77,12 @@ export default function AppointmentsPanel() {
         method: "POST",
         body: JSON.stringify({
           doctorId,
-          date,
-          time,
-          reason,
-          department,
-          type,
+          appointmentDate: date,
+          appointmentTime: time,
+          appointmentType: mapBookingTypeToAppointmentType(type),
+          reason: reason.trim(),
+          department: department.trim() || "General",
+          notes: reason.trim(),
         }),
       });
 
@@ -100,13 +106,13 @@ export default function AppointmentsPanel() {
     }
   }
 
-  async function handleCancel(id: string) {
+  async function handleStatusChange(id: string, status: AppointmentStatus) {
     setActionId(id);
     setError(null);
     try {
       const res = await authFetch(`/api/appointments/${id}`, {
         method: "PATCH",
-        body: JSON.stringify({ status: "cancelled" }),
+        body: JSON.stringify({ status }),
       });
       const data = await res.json();
       if (!res.ok || !data.success) {
@@ -121,26 +127,35 @@ export default function AppointmentsPanel() {
     }
   }
 
-  const upcoming = appointments.filter(
-    (a) => a.status !== "cancelled" && a.status !== "completed"
-  );
+  const upcoming = appointments.filter((a) => isUpcomingAppointmentStatus(a.status));
 
   return (
     <GlassCard className="md:col-span-12 p-6 md:p-8">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>
-          <h2 className="text-2xl font-bold text-white">My Appointments</h2>
+          <h2 className="text-2xl font-bold text-white flex items-center gap-2">
+            <Calendar className="text-teal-400" size={24} />
+            My Appointments
+          </h2>
           <p className="text-sm text-teal-300/80 mt-1">
             {upcoming.length} upcoming · {appointments.length} total
           </p>
         </div>
-        <button
-          type="button"
-          onClick={() => setShowForm(!showForm)}
-          className="px-4 py-2 rounded-xl bg-teal-300 text-slate-950 font-bold shadow-lg shadow-teal-500/15 hover:bg-teal-200 hover:shadow-teal-400/25 transition text-sm"
-        >
-          {showForm ? "Close" : "+ Book Appointment"}
-        </button>
+        <div className="flex flex-wrap gap-2 justify-end">
+          <Link
+            href="/patient/appointments"
+            className="px-4 py-2 rounded-xl border border-slate-700 text-slate-300 font-bold hover:bg-slate-800 transition text-sm text-center"
+          >
+            View All
+          </Link>
+          <button
+            type="button"
+            onClick={() => setShowForm(!showForm)}
+            className="px-4 py-2 rounded-xl bg-teal-300 text-slate-950 font-bold shadow-lg shadow-teal-500/15 hover:bg-teal-200 hover:shadow-teal-400/25 transition text-sm"
+          >
+            {showForm ? "Close" : "+ Book Appointment"}
+          </button>
+        </div>
       </div>
 
       {error && (
@@ -167,11 +182,15 @@ export default function AppointmentsPanel() {
               required
               className="mt-1 w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white"
             >
-              {doctors.map((d) => (
-                <option key={d._id} value={d._id}>
-                  {d.name}
-                </option>
-              ))}
+              {doctors.length === 0 ? (
+                <option value="">No verified doctors available</option>
+              ) : (
+                doctors.map((d) => (
+                  <option key={d._id} value={d._id}>
+                    {d.name}
+                  </option>
+                ))
+              )}
             </select>
           </div>
           <div>
@@ -212,15 +231,19 @@ export default function AppointmentsPanel() {
             <label className="text-xs text-slate-400 uppercase">Type</label>
             <select
               value={type}
-              onChange={(e) => setType(e.target.value as "in-person" | "telehealth")}
+              onChange={(e) =>
+                setType(e.target.value as "in-person" | "telehealth")
+              }
               className="mt-1 w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white"
             >
-              <option value="telehealth">Telehealth</option>
+              <option value="telehealth">Online / Telehealth</option>
               <option value="in-person">In-person</option>
             </select>
           </div>
           <div className="md:col-span-2">
-            <label className="text-xs text-slate-400 uppercase">Reason for visit</label>
+            <label className="text-xs text-slate-400 uppercase">
+              Reason for visit
+            </label>
             <textarea
               value={reason}
               onChange={(e) => setReason(e.target.value)}
@@ -243,22 +266,36 @@ export default function AppointmentsPanel() {
       )}
 
       {loading ? (
-        <p className="text-slate-400 text-sm py-8 text-center">Loading appointments...</p>
-      ) : appointments.length === 0 ? (
-        <p className="text-slate-400 text-sm py-8 text-center">
-          No appointments yet. Book your first visit above.
-        </p>
+        <div className="py-20 flex justify-center">
+          <p className="text-slate-400 text-sm animate-pulse">
+            Loading your schedule...
+          </p>
+        </div>
+      ) : upcoming.length === 0 ? (
+        <div className="py-12 text-center border border-dashed border-slate-800 rounded-2xl">
+          <p className="text-slate-500 text-sm">
+            No upcoming appointments scheduled. Use &quot;+ Book Appointment&quot; above.
+          </p>
+        </div>
       ) : (
         <div className="space-y-3 max-h-[480px] overflow-y-auto pr-1">
-          {appointments.map((appt) => (
+          {upcoming.slice(0, 3).map((appt) => (
             <AppointmentItem
-              key={appt._id}
+              key={appt.id}
               appointment={appt}
               variant="patient"
-              onCancel={handleCancel}
+              onStatusChange={handleStatusChange}
               loadingId={actionId}
             />
           ))}
+          {upcoming.length > 3 && (
+            <Link
+              href="/patient/appointments"
+              className="block text-center py-2 text-xs text-teal-400 hover:underline"
+            >
+              Show {upcoming.length - 3} more upcoming appointments
+            </Link>
+          )}
         </div>
       )}
     </GlassCard>

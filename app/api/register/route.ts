@@ -79,24 +79,37 @@ export async function POST(req: Request) {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const user = await User.create({
+    const user = new User({
       name: name.trim(),
       email: normalizedEmail,
       password: hashedPassword,
       role,
     });
 
+    await user.save();
+
     if (role === "patient") {
-      const Patient = (await import("@/models/Patient")).default;
-      await Patient.create({
-        userId: user._id,
-      });
+      try {
+        const Patient = (await import("@/models/Patient")).default;
+        await Patient.create({
+          userId: user._id,
+        });
+      } catch (error) {
+        await User.findByIdAndDelete(user._id);
+        throw error;
+      }
     } else if (role === "doctor") {
-      const Doctor = (await import("@/models/doctor")).default;
-      await Doctor.create({
-        userId: user._id,
-        specialization: specialization?.trim() || "General Physician",
-      });
+      try {
+        const Doctor = (await import("@/models/doctor")).default;
+        await Doctor.create({
+          userId: user._id,
+          specialization: specialization?.trim() || "General Physician",
+          verificationStatus: "Draft",
+        });
+      } catch (error) {
+        await User.findByIdAndDelete(user._id);
+        throw error;
+      }
     }
 
     return NextResponse.json<RegisterSuccessResponse>(

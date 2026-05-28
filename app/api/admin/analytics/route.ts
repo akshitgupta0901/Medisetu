@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongodb";
 import User from "@/models/user";
+import Doctor from "@/models/doctor";
 import Appointment from "@/models/appointment";
 import Prescription from "@/models/prescription";
 import { requireAdmin } from "@/lib/admin-auth";
@@ -20,16 +21,24 @@ export async function GET(req: Request) {
       completedAppointments,
       pendingAppointments,
       totalPrescriptions,
+      pendingVerifications,
+      approvedDoctors,
+      rejectedDoctors,
+      draftDoctors,
     ] = await Promise.all([
       User.countDocuments({ role: "doctor" }),
       User.countDocuments({ role: "patient" }),
       Appointment.countDocuments(),
-      Appointment.countDocuments({ status: "completed" }),
-      Appointment.countDocuments({ status: "pending" }),
+      Appointment.countDocuments({ status: "Completed" }),
+      Appointment.countDocuments({ status: "Scheduled" }),
       Prescription.countDocuments(),
+      Doctor.countDocuments({ verificationStatus: "Pending" }),
+      Doctor.countDocuments({ verificationStatus: "Approved" }),
+      Doctor.countDocuments({ verificationStatus: "Rejected" }),
+      Doctor.countDocuments({ verificationStatus: "Draft" }),
     ]);
 
-    return NextResponse.json<AdminAnalyticsResponse>({
+    return NextResponse.json<any>({
       success: true,
       stats: {
         totalDoctors,
@@ -38,6 +47,12 @@ export async function GET(req: Request) {
         completedAppointments,
         pendingAppointments,
         totalPrescriptions,
+        verification: {
+          pending: pendingVerifications,
+          approved: approvedDoctors,
+          rejected: rejectedDoctors,
+          draft: draftDoctors,
+        }
       },
     });
   } catch (error) {

@@ -52,7 +52,16 @@ export async function GET(req: Request, context: RouteContext) {
     if (auth instanceof NextResponse) return auth;
 
     const { id } = await context.params;
-    const record = await findRecord(id);
+    let record = await findRecord(id);
+
+    if (!record && auth.role === "patient") {
+      const existingPatient = await Patient.findOne({ userId: auth.userId });
+      if (!existingPatient) {
+        console.warn(`[AUTO-RECOVERY] Missing patient document for user ${auth.userId}. Creating one now...`);
+        await Patient.create({ userId: auth.userId });
+      }
+      record = await Patient.findOne({ userId: auth.userId }).populate(populateUser);
+    }
 
     if (!record) {
       return NextResponse.json<PatientRecordErrorResponse>(
@@ -84,7 +93,16 @@ export async function PUT(req: Request, context: RouteContext) {
     if (auth instanceof NextResponse) return auth;
 
     const { id } = await context.params;
-    const record = await findRecord(id);
+    let record = await findRecord(id);
+
+    if (!record && auth.role === "patient") {
+      const existingPatient = await Patient.findOne({ userId: auth.userId });
+      if (!existingPatient) {
+        console.warn(`[AUTO-RECOVERY] Missing patient document for user ${auth.userId}. Creating one now...`);
+        await Patient.create({ userId: auth.userId });
+      }
+      record = await Patient.findOne({ userId: auth.userId }).populate(populateUser);
+    }
 
     if (!record) {
       return NextResponse.json<PatientRecordErrorResponse>(
@@ -148,7 +166,7 @@ export async function PUT(req: Request, context: RouteContext) {
 
     await record.save();
 
-    const updated = await findRecord(id);
+    const updated = await findRecord(record._id.toString());
 
     return NextResponse.json<PatientRecordResponse>({
       success: true,

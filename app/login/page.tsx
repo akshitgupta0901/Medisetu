@@ -1,5 +1,6 @@
 "use client";
 
+import { signIn } from "next-auth/react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { FormEvent, useState, Suspense } from "react";
@@ -104,6 +105,11 @@ function LoginForm() {
             {loading ? "Signing in..." : "Login"}
           </button>
         </form>
+        <button
+          onClick={() => signIn("google")}
+          className="w-full bg-white text-black py-3 rounded-xl mt-4">
+          Continue with Google
+        </button>
 
         <div className="mt-6 flex justify-between text-sm">
           <Link href="/register" className="text-teal-400 hover:text-teal-300">

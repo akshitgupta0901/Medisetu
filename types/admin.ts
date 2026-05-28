@@ -33,6 +33,11 @@ export interface AdminAnalyticsStats {
   completedAppointments: number;
   pendingAppointments: number;
   totalPrescriptions: number;
+  verification?: {
+    pending: number;
+    approved: number;
+    rejected: number;
+  };
 }
 
 export interface AdminListResponse<T> {

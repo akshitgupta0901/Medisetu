@@ -4,12 +4,13 @@ import { useCallback, useEffect, useState } from "react";
 import { authFetch } from "@/lib/fetch-auth";
 import type { SafeAppointment, AppointmentStatus } from "@/types/appointment";
 import AppointmentItem from "@/components/appointments/appointmentitem";
+import { isUpcomingAppointmentStatus } from "@/lib/appointments";
 
 const FILTERS: { label: string; value: AppointmentStatus | "all" }[] = [
   { label: "All", value: "all" },
-  { label: "Pending", value: "pending" },
-  { label: "Approved", value: "approved" },
-  { label: "Completed", value: "completed" },
+  { label: "Scheduled", value: "Scheduled" },
+  { label: "Completed", value: "Completed" },
+  { label: "Cancelled", value: "Cancelled" },
 ];
 
 export default function AppointmentsPanel() {
@@ -67,7 +68,9 @@ export default function AppointmentsPanel() {
     }
   }
 
-  const pendingCount = appointments.filter((a) => a.status === "pending").length;
+  const scheduledCount = appointments.filter((a) =>
+    isUpcomingAppointmentStatus(a.status)
+  ).length;
 
   return (
     <section className="bg-slate-900/70 backdrop-blur-xl border border-slate-800 rounded-2xl p-5 md:p-6 shadow-lg shadow-black/20">
@@ -75,7 +78,7 @@ export default function AppointmentsPanel() {
         <div>
           <h3 className="text-xl font-bold text-white">Assigned Appointments</h3>
           <p className="text-slate-400 text-sm mt-1">
-            {pendingCount} pending review · {appointments.length} shown
+            {scheduledCount} scheduled · {appointments.length} shown
           </p>
         </div>
         <div className="flex flex-wrap gap-2">

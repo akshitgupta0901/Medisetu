@@ -10,6 +10,7 @@ import {
   type ReactNode,
 } from "react";
 import { useRouter } from "next/navigation";
+import { useSession, signOut as nextAuthSignOut } from "next-auth/react";
 import type { SafeUser, UserRole } from "@/types/auth";
 import { authFetch } from "@/lib/fetch-auth";
 import {
@@ -41,6 +42,7 @@ function readStoredUser(): SafeUser | null {
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+  const { data: session, status: sessionStatus } = useSession();
   const [user, setUser] = useState<SafeUser | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -56,32 +58,50 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const refetch = useCallback(async () => {
-    const token = localStorage.getItem(TOKEN_STORAGE_KEY);
-    if (!token) {
+    const hasCustomToken = !!localStorage.getItem(TOKEN_STORAGE_KEY);
+    const hasNextAuthSession = sessionStatus === "authenticated";
+
+    if (!hasCustomToken && !hasNextAuthSession) {
       persistUser(null);
       return;
     }
 
-    const res = await authFetch("/api/me");
-    const data = await res.json();
+    // Clear stale custom token if NextAuth is taking over
+    if (hasNextAuthSession && hasCustomToken) {
+      localStorage.removeItem(TOKEN_STORAGE_KEY);
+      document.cookie = `${TOKEN_COOKIE_NAME}=; path=/; max-age=0`;
+    }
 
-    if (res.ok && data.success) {
-      persistUser(data.user);
-    } else {
+    try {
+      const res = await authFetch("/api/me");
+      const data = await res.json();
+
+      if (res.ok && data.success) {
+        persistUser(data.user);
+      } else {
+        persistUser(null);
+      }
+    } catch (error) {
+      console.error("Refetch error:", error);
       persistUser(null);
     }
-  }, [persistUser]);
+  }, [persistUser, sessionStatus]);
 
   useEffect(() => {
+    if (sessionStatus === "loading") return;
+
     const stored = readStoredUser();
     if (stored) setUser(stored);
 
     refetch().finally(() => setLoading(false));
-  }, [refetch]);
+  }, [refetch, sessionStatus]);
 
-  const logout = useCallback(() => {
+  const logout = useCallback(async () => {
     persistUser(null);
-  }, [persistUser]);
+    if (sessionStatus === "authenticated") {
+      await nextAuthSignOut({ redirect: false });
+    }
+  }, [persistUser, sessionStatus]);
 
   const value = useMemo(
     () => ({

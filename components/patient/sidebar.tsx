@@ -9,10 +9,11 @@ const navItems = [
   { label: "Dashboard", href: "/patient" },
   { label: "Medical Profile", href: "/patient/profile" },
   { label: "AI Triage", href: "/patient/triage" },
+  { label: "My Appointments", href: "/patient/appointments" },
   { label: "Live Consultations", href: "/telehealth" },
-  { label: "Appointments", href: "/patient#appointments" },
   { label: "Lab Results", href: "/patient/lab-results" },
   { label: "My Prescriptions", href: "/patient/prescriptions" },
+  { label: "Billing & Payments", href: "/patient/billing" },
   { label: "Settings", href: "/patient/settings" },
 ];
 

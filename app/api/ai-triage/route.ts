@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import OpenAI from "openai";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import { connectDB } from "@/lib/mongodb";
 import TriageReport from "@/models/triage-report";
 import User from "@/models/user";
@@ -29,137 +29,163 @@ export async function POST(req: Request) {
       return forbiddenResponse("Only patients can submit triage assessments");
     }
 
-    const apiKey = process.env.OPENAI_API_KEY;
-    if (!apiKey) {
-      return NextResponse.json<TriageErrorResponse>(
-        {
-          success: false,
-          message:
-            "OpenAI API key not configured. Add OPENAI_API_KEY to .env.local",
-        },
-        { status: 503 }
-      );
-    }
-
     const body = (await req.json()) as TriageRequestBody;
-    const symptoms = body.symptoms?.trim();
+  const symptoms = body.symptoms?.trim();
+  
+if (!symptoms || symptoms.length < 3) {
+  return NextResponse.json<TriageErrorResponse>(
+    {
+      success: false,
+      message: "Please describe your symptoms (at least 3 characters)",
+    },
+    { status: 400 }
+  );
+}
 
-    if (!symptoms || symptoms.length < 3) {
-      return NextResponse.json<TriageErrorResponse>(
-        {
-          success: false,
-          message: "Please describe your symptoms (at least 3 characters)",
-        },
-        { status: 400 }
-      );
-    }
+if (symptoms.length > 2000) {
+  return NextResponse.json<TriageErrorResponse>(
+    {
+      success: false,
+      message: "Symptoms description is too long (max 2000 characters)",
+    },
+    { status: 400 }
+  );
+}
 
-    if (symptoms.length > 2000) {
-      return NextResponse.json<TriageErrorResponse>(
-        {
-          success: false,
-          message: "Symptoms description is too long (max 2000 characters)",
-        },
-        { status: 400 }
-      );
-    }
+const apiKey = process.env.GEMINI_API_KEY;
 
-    const openai = new OpenAI({ apiKey });
-    const completion = await openai.chat.completions.create({
-      model: process.env.OPENAI_MODEL ?? "gpt-4o-mini",
-      temperature: 0.3,
-      max_tokens: 1200,
-      messages: [
-        {
-          role: "system",
-          content:
-            "You are a clinical triage assistant for MediSetu healthcare platform. Provide preliminary, non-diagnostic guidance. Always err on the side of caution for serious symptoms. Output JSON only.",
-        },
-        {
-          role: "user",
-          content: buildTriagePrompt(symptoms, body.age, body.duration),
-        },
-      ],
-      response_format: { type: "json_object" },
-    });
+if (!apiKey) {
+  return NextResponse.json<TriageErrorResponse>(
+    {
+      success: false,
+      message:
+        "Gemini API key not configured. Add GEMINI_API_KEY to .env.local",
+    },
+    { status: 503 }
+  );
+}
 
-    const content = completion.choices[0]?.message?.content;
-    if (!content) {
-      return NextResponse.json<TriageErrorResponse>(
-        { success: false, message: "No response from AI model" },
-        { status: 502 }
-      );
-    }
+const genAI = new GoogleGenerativeAI(apiKey);
 
-    const analysis = parseTriageResponse(content);
-    if (!analysis) {
-      return NextResponse.json<TriageErrorResponse>(
-        { success: false, message: "Failed to parse AI triage response" },
-        { status: 502 }
-      );
-    }
+const model = genAI.getGenerativeModel({
+  model: "gemini-2.5-flash",
+});
 
-    await connectDB();
+const result = await model.generateContent(`
+You are a clinical triage assistant for MediSetu healthcare platform.
 
-    const doctorId = await assignDoctorForTriage(
-      analysis.recommendedSpecialist,
-      analysis.severityLevel
-    );
+Provide preliminary non-diagnostic guidance.
 
-    let status = initialStatus(analysis.severityLevel);
-    if (doctorId) status = status === "Escalated" ? "Escalated" : "Assigned";
+Always return valid JSON only.
 
-    const report = await TriageReport.create({
-      patientId: auth.userId,
-      doctorId: doctorId ?? undefined,
-      symptoms,
-      severity: analysis.severityLevel,
-      riskLevel: severityToRiskLevel(analysis.severityLevel),
-      triageScore: analysis.urgencyScore,
-      recommendations: buildRecommendations(analysis),
-      analysis,
-      status,
-      age: body.age,
-      duration: body.duration,
-    });
+${buildTriagePrompt(symptoms, body.age, body.duration)}
+`);
 
-    const patient = await User.findById(auth.userId).select("name email").lean();
-    const doctor = doctorId
-      ? await User.findById(doctorId).select("name").lean()
-      : null;
+const content = result.response.text();
+if (!content) {
+  return NextResponse.json<TriageErrorResponse>(
+    { success: false, message: "No response from AI model" },
+    { status: 502 }
+  );
+}
 
-    await notifyTriageSubmitted(auth.userId, String(report._id));
+const analysis = parseTriageResponse(content);
 
-    if (doctorId && patient) {
-      await notifyDoctorAssigned(doctorId, patient.name, String(report._id));
-    }
+if (!analysis) {
+  return NextResponse.json<TriageErrorResponse>(
+    { success: false, message: "Failed to parse AI triage response" },
+    { status: 502 }
+  );
+}
 
-    if (status === "Escalated" && doctorId) {
-      const { notifyTriageEscalated } = await import("@/lib/triage-workflow");
-      await notifyTriageEscalated(doctorId, String(report._id));
-    }
+await connectDB();
 
-    return NextResponse.json<
-      TriageSuccessResponse & { reportId: string; report: ReturnType<typeof toTriageReportRow> }
-    >({
-      success: true,
-      analysis,
-      reportId: String(report._id),
-      report: toTriageReportRow(
-        report.toObject(),
-        patient ?? undefined,
-        doctor ?? undefined
-      ),
-    });
-  } catch (error) {
-    console.error("AI Triage error:", error);
-    const message =
-      error instanceof OpenAI.APIError
-        ? error.message
-        : "AI triage service unavailable. Please try again.";
-    return NextResponse.json<TriageErrorResponse>(
-      { success: false, message },
-      { status: 500 }
-    );
+const doctorId = await assignDoctorForTriage(
+  analysis.recommendedSpecialist,
+  analysis.severityLevel
+);
+
+let status = initialStatus(analysis.severityLevel);
+
+if (doctorId) {
+  status = status === "Escalated" ? "Escalated" : "Assigned";
+}
+
+const report = await TriageReport.create({
+  patientId: auth.userId,
+  doctorId: doctorId ?? undefined,
+  symptoms,
+  severity: analysis.severityLevel,
+  riskLevel: severityToRiskLevel(analysis.severityLevel),
+  triageScore: analysis.urgencyScore,
+  recommendations: buildRecommendations(analysis),
+  analysis,
+  status,
+  age: body.age,
+  duration: body.duration,
+});
+
+const patient = await User.findById(auth.userId)
+  .select("name email")
+  .lean();
+
+const doctor = doctorId
+  ? await User.findById(doctorId).select("name").lean()
+  : null;
+
+await notifyTriageSubmitted(auth.userId, String(report._id));
+
+if (doctorId && patient) {
+  await notifyDoctorAssigned(
+    doctorId,
+    patient.name,
+    String(report._id)
+  );
+}
+
+if (status === "Escalated" && doctorId) {
+  const { notifyTriageEscalated } = await import(
+    "@/lib/triage-workflow"
+  );
+
+  await notifyTriageEscalated(
+    doctorId,
+    String(report._id)
+  );
+}
+
+return NextResponse.json<
+  TriageSuccessResponse & {
+    reportId: string;
+    report: ReturnType<typeof toTriageReportRow>;
   }
+>({
+  success: true,
+  analysis,
+  reportId: String(report._id),
+  report: toTriageReportRow(
+    report.toObject(),
+    patient ?? undefined,
+    doctor ?? undefined
+  ),
+});
+
+} catch (error) {
+  console.error("AI Triage error:", error);
+
+  const message =
+    error instanceof Error
+      ? error.message
+      : "AI triage service unavailable. Please try again.";
+
+  return NextResponse.json<TriageErrorResponse>(
+    {
+      success: false,
+      message,
+    },
+    {
+      status: 500,
+    }
+  );
+}
 }

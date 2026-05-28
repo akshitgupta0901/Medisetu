@@ -5,6 +5,14 @@ import { authFetch } from "@/lib/fetch-auth";
 import type { SafeAppointment, AppointmentStatus } from "@/types/appointment";
 import AppointmentItem from "@/components/appointments/appointmentitem";
 import ExportButton from "@/components/admin/export-button";
+import { isUpcomingAppointmentStatus } from "@/lib/appointments";
+
+const STATUS_OPTIONS: { label: string; value: AppointmentStatus | "all" }[] = [
+  { label: "All statuses", value: "all" },
+  { label: "Scheduled", value: "Scheduled" },
+  { label: "Completed", value: "Completed" },
+  { label: "Cancelled", value: "Cancelled" },
+];
 
 export default function AppointmentsPanel() {
   const [appointments, setAppointments] = useState<SafeAppointment[]>([]);
@@ -61,9 +69,10 @@ export default function AppointmentsPanel() {
   }
 
   const stats = {
-    pending: appointments.filter((a) => a.status === "pending").length,
-    approved: appointments.filter((a) => a.status === "approved").length,
-    completed: appointments.filter((a) => a.status === "completed").length,
+    scheduled: appointments.filter((a) => isUpcomingAppointmentStatus(a.status))
+      .length,
+    completed: appointments.filter((a) => a.status === "Completed").length,
+    cancelled: appointments.filter((a) => a.status === "Cancelled").length,
   };
 
   return (
@@ -84,25 +93,25 @@ export default function AppointmentsPanel() {
               id: a._id,
               patient: a.patient?.name ?? a.patientId,
               doctor: a.doctor?.name ?? a.doctorId,
-              date: a.date,
+              date: a.appointmentDate || a.date,
               status: a.status,
             }))}
             filename="appointments-export"
           />
-        <div className="flex flex-wrap gap-3 text-center">
-          <div className="rounded-xl bg-amber-950/30 border border-amber-500/20 px-4 py-2">
-            <p className="text-lg font-bold text-amber-400">{stats.pending}</p>
-            <p className="text-xs text-slate-500">Pending</p>
+          <div className="flex flex-wrap gap-3 text-center">
+            <div className="rounded-xl bg-teal-950/30 border border-teal-500/20 px-4 py-2">
+              <p className="text-lg font-bold text-teal-400">{stats.scheduled}</p>
+              <p className="text-xs text-slate-500">Scheduled</p>
+            </div>
+            <div className="rounded-xl bg-emerald-950/30 border border-emerald-500/20 px-4 py-2">
+              <p className="text-lg font-bold text-emerald-400">{stats.completed}</p>
+              <p className="text-xs text-slate-500">Completed</p>
+            </div>
+            <div className="rounded-xl bg-red-950/30 border border-red-500/20 px-4 py-2">
+              <p className="text-lg font-bold text-red-400">{stats.cancelled}</p>
+              <p className="text-xs text-slate-500">Cancelled</p>
+            </div>
           </div>
-          <div className="rounded-xl bg-teal-950/30 border border-teal-500/20 px-4 py-2">
-            <p className="text-lg font-bold text-teal-400">{stats.approved}</p>
-            <p className="text-xs text-slate-500">Approved</p>
-          </div>
-          <div className="rounded-xl bg-emerald-950/30 border border-emerald-500/20 px-4 py-2">
-            <p className="text-lg font-bold text-emerald-400">{stats.completed}</p>
-            <p className="text-xs text-slate-500">Completed</p>
-          </div>
-        </div>
         </div>
       </div>
 
@@ -113,11 +122,11 @@ export default function AppointmentsPanel() {
         }
         className="mb-4 bg-slate-950 border border-slate-700 rounded-xl px-4 py-2 text-sm text-white"
       >
-        <option value="all">All statuses</option>
-        <option value="pending">Pending</option>
-        <option value="approved">Approved</option>
-        <option value="completed">Completed</option>
-        <option value="cancelled">Cancelled</option>
+        {STATUS_OPTIONS.map((opt) => (
+          <option key={opt.value} value={opt.value}>
+            {opt.label}
+          </option>
+        ))}
       </select>
 
       {error && (

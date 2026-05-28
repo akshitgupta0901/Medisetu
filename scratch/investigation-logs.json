@@ -1,0 +1,148 @@
+{
+  "schemaPaths": [
+    "userId",
+    "bloodGroup",
+    "allergies",
+    "medicalHistory",
+    "medications",
+    "emergencyContact",
+    "doctorNotes",
+    "dateOfBirth",
+    "gender",
+    "phone",
+    "address",
+    "_id",
+    "createdAt",
+    "updatedAt",
+    "__v"
+  ],
+  "body": {
+    "dateOfBirth": "1990-01-01T00:00:00.000Z",
+    "gender": "Male",
+    "phone": "1234567890",
+    "address": "123 Test St",
+    "bloodGroup": "O+"
+  },
+  "recordBeforeSave": {
+    "_id": "6a1207928cedd0b479f17a23",
+    "userId": {
+      "_id": "6a1207928cedd0b479f17a22",
+      "name": "Aksh",
+      "email": "akshitgupta090106@gmail.com",
+      "role": "patient"
+    },
+    "bloodGroup": "O+",
+    "allergies": [
+      "Peanuts",
+      "Dust",
+      "Gluten"
+    ],
+    "medicalHistory": [
+      {
+        "condition": "Asthma",
+        "status": "active",
+        "notes": "Mild symptoms",
+        "_id": "6a162ddceddb3a10d0d547ed"
+      }
+    ],
+    "medications": [
+      {
+        "name": "Albuterol",
+        "dosage": "2 puffs",
+        "frequency": "As needed",
+        "_id": "6a162ddceddb3a10d0d547ee"
+      }
+    ],
+    "emergencyContact": {
+      "name": "Emergency Name Updated",
+      "relationship": "Spouse",
+      "phone": "+1-555-0199"
+    },
+    "doctorNotes": [],
+    "createdAt": "2026-05-23T20:01:22.107Z",
+    "updatedAt": "2026-05-26T23:40:01.681Z",
+    "__v": 2,
+    "address": "123 Test St",
+    "dateOfBirth": "1990-01-01T00:00:00.000Z",
+    "gender": "Male",
+    "phone": "1234567890"
+  },
+  "rawBefore": {
+    "_id": "6a1207928cedd0b479f17a23",
+    "userId": "6a1207928cedd0b479f17a22",
+    "bloodGroup": "O+",
+    "allergies": [
+      "Peanuts",
+      "Dust",
+      "Gluten"
+    ],
+    "medicalHistory": [
+      {
+        "condition": "Asthma",
+        "status": "active",
+        "notes": "Mild symptoms",
+        "_id": "6a162ddceddb3a10d0d547ed"
+      }
+    ],
+    "medications": [
+      {
+        "name": "Albuterol",
+        "dosage": "2 puffs",
+        "frequency": "As needed",
+        "_id": "6a162ddceddb3a10d0d547ee"
+      }
+    ],
+    "emergencyContact": {
+      "name": "Emergency Name Updated",
+      "relationship": "Spouse",
+      "phone": "+1-555-0199"
+    },
+    "doctorNotes": [],
+    "createdAt": "2026-05-23T20:01:22.107Z",
+    "updatedAt": "2026-05-26T23:33:48.502Z",
+    "__v": 2,
+    "address": "123 Main St, New York, Updated",
+    "dateOfBirth": "1995-10-15T00:00:00.000Z",
+    "gender": "Male",
+    "phone": "1234567890"
+  },
+  "rawAfter": {
+    "_id": "6a1207928cedd0b479f17a23",
+    "userId": "6a1207928cedd0b479f17a22",
+    "bloodGroup": "O+",
+    "allergies": [
+      "Peanuts",
+      "Dust",
+      "Gluten"
+    ],
+    "medicalHistory": [
+      {
+        "condition": "Asthma",
+        "status": "active",
+        "notes": "Mild symptoms",
+        "_id": "6a162ddceddb3a10d0d547ed"
+      }
+    ],
+    "medications": [
+      {
+        "name": "Albuterol",
+        "dosage": "2 puffs",
+        "frequency": "As needed",
+        "_id": "6a162ddceddb3a10d0d547ee"
+      }
+    ],
+    "emergencyContact": {
+      "name": "Emergency Name Updated",
+      "relationship": "Spouse",
+      "phone": "+1-555-0199"
+    },
+    "doctorNotes": [],
+    "createdAt": "2026-05-23T20:01:22.107Z",
+    "updatedAt": "2026-05-26T23:40:01.681Z",
+    "__v": 2,
+    "address": "123 Test St",
+    "dateOfBirth": "1990-01-01T00:00:00.000Z",
+    "gender": "Male",
+    "phone": "1234567890"
+  }
+}

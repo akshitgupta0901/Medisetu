@@ -1,59 +1,73 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Loader2, Save, User } from "lucide-react";
+import { Loader2, Save, User, ShieldCheck } from "lucide-react";
+import { authFetch } from "@/lib/fetch-auth";
+import { calculateDoctorProfileCompletion } from "@/lib/doctor-profile";
 
-export default function DoctorProfileEditor() {
-  const [profile, setProfile] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+interface DoctorProfileEditorProps {
+  initialProfile: Record<string, unknown> | null;
+  weeklySlotCount: number;
+  onRefresh: () => void;
+}
+
+export default function DoctorProfileEditor({
+  initialProfile,
+  weeklySlotCount,
+  onRefresh,
+}: DoctorProfileEditorProps) {
+  const [profile, setProfile] = useState<Record<string, unknown>>(
+    initialProfile ?? {}
+  );
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const res = await fetch("/api/doctors/profile");
-        const data = await res.json();
-        if (data.success) {
-          setProfile(data.profile);
-        }
-      } catch (error) {
-        console.error("Failed to fetch profile:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchProfile();
-  }, []);
+    if (initialProfile) setProfile(initialProfile);
+  }, [initialProfile]);
+
+  const completion =
+    typeof initialProfile?.completionPercent === "number"
+      ? initialProfile.completionPercent
+      : calculateDoctorProfileCompletion(
+          profile as Parameters<typeof calculateDoctorProfileCompletion>[0],
+          weeklySlotCount
+        );
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
     setSuccess(false);
+    setError(null);
     try {
-      const res = await fetch("/api/doctors/profile", {
+      const res = await authFetch("/api/doctors/profile", {
         method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(profile),
+        body: JSON.stringify({
+          specialization: profile.specialization,
+          qualification: profile.qualification,
+          hospital: profile.hospital,
+          experience: profile.experience,
+          consultationFee: profile.consultationFee,
+          phone: profile.phone,
+          bio: profile.bio,
+          address: profile.address,
+        }),
       });
-      if (res.ok) {
+      const data = await res.json();
+      if (res.ok && data.success) {
         setSuccess(true);
+        onRefresh();
         setTimeout(() => setSuccess(false), 3000);
+      } else {
+        setError(data.message ?? "Failed to save profile");
       }
-    } catch (error) {
-      console.error("Failed to save profile:", error);
+    } catch {
+      setError("Network error saving profile");
     } finally {
       setSaving(false);
     }
   };
-
-  if (loading) {
-    return (
-      <div className="flex justify-center p-20">
-        <Loader2 className="w-10 h-10 animate-spin text-teal-400" />
-      </div>
-    );
-  }
 
   return (
     <div className="bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden">
@@ -63,8 +77,30 @@ export default function DoctorProfileEditor() {
             <User className="w-6 h-6 text-teal-400" />
           </div>
           <div>
-            <h2 className="text-xl font-bold text-white">Professional Profile</h2>
+            <div className="flex items-center gap-3">
+              <h2 className="text-xl font-bold text-white">Professional Profile</h2>
+              {profile?.verificationStatus === "Approved" && (
+                <span className="flex items-center gap-1 px-2 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full text-[10px] font-bold uppercase tracking-wider">
+                  <ShieldCheck size={10} /> Verified
+                </span>
+              )}
+            </div>
             <p className="text-sm text-slate-400">Manage your clinical information</p>
+          </div>
+        </div>
+
+        <div className="hidden md:flex flex-col items-end gap-2">
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+              Completion
+            </span>
+            <span className="text-sm font-bold text-teal-400">{completion}%</span>
+          </div>
+          <div className="w-48 h-1.5 bg-slate-800 rounded-full overflow-hidden border border-slate-700/50">
+            <div
+              className="h-full bg-gradient-to-r from-teal-600 to-teal-400 transition-all duration-500"
+              style={{ width: `${completion}%` }}
+            />
           </div>
         </div>
         {success && (
@@ -74,111 +110,134 @@ export default function DoctorProfileEditor() {
         )}
       </div>
 
+      {error && (
+        <div className="mx-6 mt-4 rounded-xl border border-red-500/30 bg-red-950/30 px-4 py-3 text-sm text-red-300">
+          {error}
+        </div>
+      )}
+
       <form onSubmit={handleSubmit} className="p-6 md:p-8 space-y-8">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
-            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Specialization</label>
+            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+              Specialization *
+            </label>
             <input
               type="text"
-              value={profile.specialization}
-              onChange={(e) => setProfile({ ...profile, specialization: e.target.value })}
+              value={String(profile.specialization ?? "")}
+              onChange={(e) =>
+                setProfile({ ...profile, specialization: e.target.value })
+              }
               className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-teal-500 transition"
               required
             />
           </div>
 
           <div className="space-y-2">
-            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Qualification</label>
+            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+              Qualification *
+            </label>
             <input
               type="text"
-              value={profile.qualification}
-              onChange={(e) => setProfile({ ...profile, qualification: e.target.value })}
+              value={String(profile.qualification ?? "")}
+              onChange={(e) =>
+                setProfile({ ...profile, qualification: e.target.value })
+              }
               className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-teal-500 transition"
               placeholder="e.g. MBBS, MD (Cardiology)"
+              required
             />
           </div>
 
           <div className="space-y-2">
-            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Hospital/Clinic Name</label>
+            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+              Hospital / Clinic Name *
+            </label>
             <input
               type="text"
-              value={profile.hospital}
-              onChange={(e) => setProfile({ ...profile, hospital: e.target.value })}
+              value={String(profile.hospital ?? "")}
+              onChange={(e) =>
+                setProfile({ ...profile, hospital: e.target.value })
+              }
               className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-teal-500 transition"
+              required
             />
           </div>
 
           <div className="space-y-2">
-            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Experience (Years)</label>
+            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+              Experience (Years) *
+            </label>
             <input
               type="number"
-              value={profile.experience}
-              onChange={(e) => setProfile({ ...profile, experience: parseInt(e.target.value) || 0 })}
+              min={0}
+              value={Number(profile.experience ?? 0)}
+              onChange={(e) =>
+                setProfile({
+                  ...profile,
+                  experience: parseInt(e.target.value, 10) || 0,
+                })
+              }
               className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-teal-500 transition"
+              required
             />
           </div>
 
           <div className="space-y-2">
-            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Consultation Fee ($)</label>
+            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+              Consultation Fee ($) *
+            </label>
             <input
               type="number"
-              value={profile.consultationFee}
-              onChange={(e) => setProfile({ ...profile, consultationFee: parseInt(e.target.value) || 0 })}
+              min={1}
+              value={Number(profile.consultationFee ?? 0)}
+              onChange={(e) =>
+                setProfile({
+                  ...profile,
+                  consultationFee: parseInt(e.target.value, 10) || 0,
+                })
+              }
               className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-teal-500 transition"
+              required
             />
           </div>
 
           <div className="space-y-2">
-            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Phone Number</label>
+            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+              Phone Number *
+            </label>
             <input
               type="tel"
-              value={profile.phone || ""}
+              value={String(profile.phone ?? "")}
               onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
               className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-teal-500 transition"
+              required
             />
           </div>
         </div>
 
         <div className="space-y-2">
-          <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Biography</label>
+          <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+            Biography *
+          </label>
           <textarea
-            value={profile.bio || ""}
+            value={String(profile.bio ?? "")}
             onChange={(e) => setProfile({ ...profile, bio: e.target.value })}
             rows={4}
             className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-teal-500 transition resize-none"
             placeholder="Write a brief description about your expertise and background..."
+            required
           />
         </div>
 
-        <div className="space-y-4">
-          <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Availability</label>
-          <div className="p-4 bg-slate-950 border border-slate-800 rounded-2xl grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <label className="text-xs text-slate-500">Start Time</label>
-              <input
-                type="time"
-                value={profile.availability?.startTime || "09:00"}
-                onChange={(e) => setProfile({ 
-                  ...profile, 
-                  availability: { ...profile.availability, startTime: e.target.value } 
-                })}
-                className="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-white"
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-xs text-slate-500">End Time</label>
-              <input
-                type="time"
-                value={profile.availability?.endTime || "17:00"}
-                onChange={(e) => setProfile({ 
-                  ...profile, 
-                  availability: { ...profile.availability, endTime: e.target.value } 
-                })}
-                className="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-white"
-              />
-            </div>
-          </div>
-        </div>
+        <p className="text-xs text-slate-500">
+          * Required for verification. Add at least one weekly availability slot below to reach 100%.
+          {weeklySlotCount < 1 && (
+            <span className="text-amber-400 block mt-1">
+              No availability slots saved yet ({weeklySlotCount} configured).
+            </span>
+          )}
+        </p>
 
         <button
           type="submit"

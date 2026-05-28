@@ -127,7 +127,7 @@ export async function POST(req: Request) {
     const appointmentQuery: Record<string, unknown> = {
       _id: appointmentId,
       patientId,
-      status: "approved",
+      status: { $in: ["approved", "Scheduled", "Completed"] },
     };
 
     if (auth.role === "doctor") {

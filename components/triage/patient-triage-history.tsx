@@ -113,6 +113,20 @@ export default function PatientTriageHistory() {
                 <li key={i}>{rec}</li>
               ))}
             </ul>
+
+            {selected.doctorNotes && (
+              <div className="mt-6">
+                <h3 className="text-sm font-bold text-teal-400 mb-2">
+                  Doctor Notes
+                </h3>
+                <div className="rounded-xl border border-slate-700 bg-slate-900/50 p-4">
+                  <p className="text-slate-300 text-sm whitespace-pre-wrap">
+                    {selected.doctorNotes}
+                  </p>
+                </div>
+              </div>
+            )}
+
             <div className="mt-6 flex gap-2">
               <button
                 type="button"

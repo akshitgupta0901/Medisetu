@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongodb";
 import User from "@/models/user";
+import Doctor from "@/models/doctor";
 import { requireAuth } from "@/lib/api-auth";
 import { toSafeUser } from "@/lib/auth";
 import type { MeSuccessResponse, AuthErrorResponse } from "@/types/auth";
@@ -23,9 +24,18 @@ export async function GET(req: Request) {
       );
     }
 
+    let isVerified = false;
+    if (user.role === "doctor") {
+      const profile = await Doctor.findOne({ userId: user._id });
+      isVerified = profile?.verificationStatus === "Approved";
+    }
+
     return NextResponse.json<MeSuccessResponse>({
       success: true,
-      user: toSafeUser(user),
+      user: {
+        ...toSafeUser(user),
+        isVerified
+      },
     });
   } catch (error) {
     console.error("Me API error:", error);

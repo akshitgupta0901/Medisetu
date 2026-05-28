@@ -1,25 +1,30 @@
 export type AppointmentStatus =
-  | "pending"
-  | "approved"
-  | "completed"
-  | "cancelled";
+  | "Scheduled"
+  | "Completed"
+  | "Cancelled";
 
-export type AppointmentType = "in-person" | "telehealth";
+export type AppointmentType = "Online" | "In-Person";
 
 export interface CreateAppointmentBody {
+  patientId?: string;
   doctorId: string;
-  date: string;
-  time: string;
-  reason: string;
+  triageReportId?: string;
+  appointmentDate?: string;
+  appointmentTime?: string;
+  appointmentType?: AppointmentType;
+  notes?: string;
+  /** Legacy patient booking fields */
+  date?: string;
+  time?: string;
+  type?: string;
+  reason?: string;
   department?: string;
-  type?: AppointmentType;
 }
 
 export interface UpdateAppointmentBody {
   status?: AppointmentStatus;
-  date?: string;
-  time?: string;
-  reason?: string;
+  appointmentDate?: string;
+  appointmentTime?: string;
   notes?: string;
 }
 
@@ -30,16 +35,22 @@ export interface AppointmentUserRef {
 }
 
 export interface SafeAppointment {
+  id: string;
   _id: string;
   patientId: string;
   doctorId: string;
+  triageReportId?: string;
   patient?: AppointmentUserRef;
   doctor?: AppointmentUserRef;
+  doctorVerified?: boolean;
+  appointmentDate: string;
+  appointmentTime: string;
+  appointmentType: AppointmentType;
   date: string;
   time: string;
+  type: string;
   reason: string;
   department: string;
-  type: AppointmentType;
   status: AppointmentStatus;
   notes?: string;
   createdAt?: string;

@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongodb";
 import Appointment from "@/models/appointment";
+import User from "@/models/user";
+import Doctor from "@/models/doctor";
 import {
   requireAuth,
   forbiddenResponse,
@@ -10,6 +12,7 @@ import {
   isValidStatus,
   parseAppointmentDate,
   isWithinBookingWindow,
+  getObjectIdString,
 } from "@/lib/appointments";
 import type {
   UpdateAppointmentBody,
@@ -29,23 +32,14 @@ async function findAppointment(id: string) {
   return Appointment.findById(id).populate(populateFields);
 }
 
-function getRefId(field: unknown): string {
-  if (!field) return "";
-  if (typeof field === "string") return field;
-  if (typeof field === "object" && field !== null && "_id" in field) {
-    return (field as { _id: { toString(): string } })._id.toString();
-  }
-  return String(field);
-}
-
 function canAccess(
   auth: { userId: string; role: string },
   appointment: { patientId: unknown; doctorId: unknown }
 ): boolean {
   if (auth.role === "admin") return true;
-  if (auth.role === "patient" && getRefId(appointment.patientId) === auth.userId)
+  if (auth.role === "patient" && getObjectIdString(appointment.patientId) === auth.userId)
     return true;
-  if (auth.role === "doctor" && getRefId(appointment.doctorId) === auth.userId)
+  if (auth.role === "doctor" && getObjectIdString(appointment.doctorId) === auth.userId)
     return true;
   return false;
 }
@@ -53,12 +47,16 @@ function canAccess(
 export async function GET(req: Request, context: RouteContext) {
   try {
     const auth = await requireAuth(req);
+    console.log("DEBUG APPOINTMENT ID GET: AUTH INFO", { userId: auth instanceof NextResponse ? 'N/A' : auth.userId, role: auth instanceof NextResponse ? 'N/A' : auth.role });
     if (auth instanceof NextResponse) return auth;
 
     const { id } = await context.params;
+    console.log("DEBUG APPOINTMENT ID GET: TARGET ID", id);
+    
     const appointment = await findAppointment(id);
 
     if (!appointment) {
+      console.log("DEBUG APPOINTMENT ID GET: NOT FOUND");
       return NextResponse.json<AppointmentErrorResponse>(
         { success: false, message: "Appointment not found" },
         { status: 404 }
@@ -66,31 +64,52 @@ export async function GET(req: Request, context: RouteContext) {
     }
 
     if (!canAccess(auth, appointment)) {
+      console.log("DEBUG APPOINTMENT ID GET: ACCESS DENIED");
       return forbiddenResponse("You do not have access to this appointment");
     }
 
-    return NextResponse.json<AppointmentSuccessResponse>({
+    const doctorIdStr = getObjectIdString(appointment.doctorId);
+    const doctorProfile = await Doctor.findOne({ userId: doctorIdStr, verificationStatus: "Approved" });
+    console.log("DEBUG APPOINTMENT ID GET: DOCTOR VERIFIED?", !!doctorProfile);
+
+    const responseData = {
       success: true,
-      appointment: toSafeAppointment(appointment),
+      appointment: {
+        ...toSafeAppointment(appointment),
+        doctorVerified: !!doctorProfile
+      },
+    };
+    
+    console.log("DEBUG APPOINTMENT ID GET: RETURNING SUCCESS");
+    return NextResponse.json(responseData);
+  } catch (error: any) {
+    console.error("DEBUG APPOINTMENT ID GET CRASH:", {
+      message: error.message,
+      stack: error.stack,
+      error
     });
-  } catch (error) {
-    console.error("Appointment GET error:", error);
-    return NextResponse.json<AppointmentErrorResponse>(
-      { success: false, message: "Internal server error" },
-      { status: 500 }
-    );
+    return NextResponse.json({
+      success: false,
+      message: "Internal server error",
+      error: error.message,
+      stack: process.env.NODE_ENV === "development" ? error.stack : undefined
+    }, { status: 500 });
   }
 }
 
 export async function PATCH(req: Request, context: RouteContext) {
   try {
     const auth = await requireAuth(req);
+    console.log("DEBUG APPOINTMENT ID PATCH: AUTH INFO", { userId: auth instanceof NextResponse ? 'N/A' : auth.userId, role: auth instanceof NextResponse ? 'N/A' : auth.role });
     if (auth instanceof NextResponse) return auth;
 
     const { id } = await context.params;
+    console.log("DEBUG APPOINTMENT ID PATCH: TARGET ID", id);
+    
     const appointment = await findAppointment(id);
 
     if (!appointment) {
+      console.log("DEBUG APPOINTMENT ID PATCH: NOT FOUND");
       return NextResponse.json<AppointmentErrorResponse>(
         { success: false, message: "Appointment not found" },
         { status: 404 }
@@ -98,46 +117,65 @@ export async function PATCH(req: Request, context: RouteContext) {
     }
 
     if (!canAccess(auth, appointment)) {
+      console.log("DEBUG APPOINTMENT ID PATCH: ACCESS DENIED");
       return forbiddenResponse("You do not have access to this appointment");
     }
 
     const body = (await req.json()) as UpdateAppointmentBody;
-
-    if (auth.role === "patient") {
-      if (body.status && body.status !== "cancelled") {
-        return forbiddenResponse("Patients can only cancel appointments");
-      }
-      if (appointment.status !== "pending" && body.status === "cancelled") {
-        return NextResponse.json<AppointmentErrorResponse>(
-          { success: false, message: "Only pending appointments can be cancelled" },
-          { status: 400 }
-        );
-      }
-    }
+    console.log("DEBUG APPOINTMENT ID PATCH: REQUEST BODY", body);
 
     if (body.status) {
       if (!isValidStatus(body.status)) {
         return NextResponse.json<AppointmentErrorResponse>(
           {
             success: false,
-            message: "Status must be: pending, approved, completed, or cancelled",
+            message: "Status must be: Scheduled, Completed, or Cancelled",
           },
           { status: 400 }
         );
       }
 
+      // Role-based status authorization
+      if (auth.role === "patient") {
+        if (body.status !== "Cancelled") {
+          return forbiddenResponse("Patients can only cancel appointments");
+        }
+      }
+
       if (auth.role === "doctor") {
-        const allowed = ["approved", "completed", "cancelled"];
-        if (!allowed.includes(body.status)) {
-          return forbiddenResponse("Doctors cannot set this status");
+        if (body.status === "Scheduled") {
+          return forbiddenResponse("Doctors cannot set an appointment back to Scheduled");
         }
       }
 
       appointment.status = body.status;
     }
 
-    if (body.date) {
-      const newDate = parseAppointmentDate(body.date);
+    if (body.appointmentDate || body.appointmentTime) {
+      const checkDate = body.appointmentDate ? parseAppointmentDate(body.appointmentDate) : appointment.appointmentDate;
+      const checkTime = body.appointmentTime || appointment.appointmentTime;
+      
+      if (checkDate) {
+        const existing = await Appointment.findOne({
+          _id: { $ne: id },
+          doctorId: appointment.doctorId,
+          appointmentDate: {
+            $gte: new Date(checkDate).setHours(0, 0, 0, 0),
+            $lte: new Date(checkDate).setHours(23, 59, 59, 999)
+          },
+          appointmentTime: checkTime,
+          status: { $ne: "Cancelled" }
+        });
+        
+        if (existing) {
+          console.log("DEBUG APPOINTMENT ID PATCH: SLOT BOOKED ALREADY");
+          return NextResponse.json({ success: false, message: "This time slot is already booked" }, { status: 409 });
+        }
+      }
+    }
+
+    if (body.appointmentDate) {
+      const newDate = parseAppointmentDate(body.appointmentDate);
       if (!newDate || !isWithinBookingWindow(newDate)) {
         return NextResponse.json<AppointmentErrorResponse>(
           {
@@ -147,55 +185,73 @@ export async function PATCH(req: Request, context: RouteContext) {
           { status: 400 }
         );
       }
-      appointment.date = newDate;
+      appointment.appointmentDate = newDate;
     }
 
-    if (body.time) appointment.time = body.time.trim();
-    if (body.reason) appointment.reason = body.reason.trim();
+    if (body.appointmentTime) appointment.appointmentTime = body.appointmentTime.trim();
     if (body.notes !== undefined) appointment.notes = body.notes.trim();
 
+    console.log("DEBUG APPOINTMENT ID PATCH: SAVING CHANGES");
     await appointment.save();
 
     const updated = await findAppointment(id);
+    const updatedDoctorIdStr = getObjectIdString(updated!.doctorId);
+    const doctorProfile = await Doctor.findOne({ userId: updatedDoctorIdStr, verificationStatus: "Approved" });
+    console.log("DEBUG APPOINTMENT ID PATCH: DOCTOR VERIFIED?", !!doctorProfile);
 
     // Create notifications for status changes
     if (body.status) {
       const { createNotification } = await import("@/lib/notifications");
+      const patientId = getObjectIdString(appointment.patientId);
+      const doctorId = getObjectIdString(appointment.doctorId);
       
-      // If doctor updates, notify patient
-      if (auth.role === "doctor" || auth.role === "admin") {
-         await createNotification({
-           userId: getRefId(appointment.patientId),
-           title: `Appointment ${body.status.charAt(0).toUpperCase() + body.status.slice(1)}`,
-           message: `Your appointment with Dr. ${getRefId(appointment.doctorId)} has been ${body.status}.`,
-           type: "appointment",
-           link: `/patient`,
-         });
-      }
-      
-      // If patient cancels, notify doctor
-      if (auth.role === "patient" && body.status === "cancelled") {
+      if (body.status === "Cancelled") {
+        const targetUserId = auth.role === "patient" ? doctorId : patientId;
+        const msg = auth.role === "patient" 
+          ? "A patient has cancelled their appointment."
+          : "Your appointment has been cancelled";
+        
         await createNotification({
-          userId: getRefId(appointment.doctorId),
+          userId: targetUserId,
           title: "Appointment Cancelled",
-          message: `A patient has cancelled their appointment for ${appointment.date.toDateString()}.`,
+          message: msg,
           type: "appointment",
-          link: `/doctor`,
+          link: auth.role === "patient" ? `/doctor/appointments` : `/patient/appointments`,
+        });
+      } else if (body.status === "Completed") {
+        await createNotification({
+          userId: patientId,
+          title: "Appointment Completed",
+          message: "Your appointment has been marked as completed",
+          type: "appointment",
+          link: `/patient/appointments`,
         });
       }
     }
 
-    return NextResponse.json<AppointmentSuccessResponse>({
+    const responseData = {
       success: true,
-      appointment: toSafeAppointment(updated!),
+      appointment: {
+        ...toSafeAppointment(updated!),
+        doctorVerified: !!doctorProfile
+      },
       message: "Appointment updated successfully",
+    };
+    
+    console.log("DEBUG APPOINTMENT ID PATCH: RETURNING SUCCESS");
+    return NextResponse.json(responseData);
+  } catch (error: any) {
+    console.error("DEBUG APPOINTMENT ID PATCH CRASH:", {
+      message: error.message,
+      stack: error.stack,
+      error
     });
-  } catch (error) {
-    console.error("Appointment PATCH error:", error);
-    return NextResponse.json<AppointmentErrorResponse>(
-      { success: false, message: "Internal server error" },
-      { status: 500 }
-    );
+    return NextResponse.json({
+      success: false,
+      message: "Internal server error",
+      error: error.message,
+      stack: process.env.NODE_ENV === "development" ? error.stack : undefined
+    }, { status: 500 });
   }
 }
 
@@ -222,29 +278,14 @@ export async function DELETE(req: Request, context: RouteContext) {
       });
     }
 
-    if (auth.role === "patient" && getRefId(appointment.patientId) === auth.userId) {
-      if (appointment.status === "completed") {
-        return NextResponse.json<AppointmentErrorResponse>(
-          { success: false, message: "Completed appointments cannot be deleted" },
-          { status: 400 }
-        );
-      }
-      appointment.status = "cancelled";
-      await appointment.save();
-      const updated = await findAppointment(id);
-      return NextResponse.json<AppointmentSuccessResponse>({
-        success: true,
-        appointment: toSafeAppointment(updated!),
-        message: "Appointment cancelled",
-      });
-    }
-
     return forbiddenResponse("You cannot delete this appointment");
-  } catch (error) {
+  } catch (error: any) {
     console.error("Appointment DELETE error:", error);
-    return NextResponse.json<AppointmentErrorResponse>(
-      { success: false, message: "Internal server error" },
-      { status: 500 }
-    );
+    return NextResponse.json({
+      success: false,
+      message: "Internal server error",
+      error: error.message,
+      stack: process.env.NODE_ENV === "development" ? error.stack : undefined
+    }, { status: 500 });
   }
 }

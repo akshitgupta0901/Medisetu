@@ -23,9 +23,15 @@ export async function GET(req: Request) {
     const totalPatients = uniquePatients.length;
 
     // Appointment counts
-    const completedAppointments = await Appointment.countDocuments({ doctorId, status: "completed" });
-    const pendingAppointments = await Appointment.countDocuments({ doctorId, status: "pending" });
-    const approvedAppointments = await Appointment.countDocuments({ doctorId, status: "approved" });
+    const completedAppointments = await Appointment.countDocuments({
+      doctorId,
+      status: { $in: ["Completed", "completed"] },
+    } as Record<string, unknown>);
+    const pendingAppointments = await Appointment.countDocuments({
+      doctorId,
+      status: { $in: ["Scheduled", "pending", "approved"] },
+    } as Record<string, unknown>);
+    const approvedAppointments = pendingAppointments;
 
     // Prescriptions issued
     const totalPrescriptions = await Prescription.countDocuments({ doctorId });
@@ -38,15 +44,18 @@ export async function GET(req: Request) {
       {
         $match: {
           doctorId: new (await import("mongoose")).Types.ObjectId(doctorId),
-          date: { $gte: sixMonthsAgo },
-          status: "completed"
-        }
+          $or: [
+            { appointmentDate: { $gte: sixMonthsAgo } },
+            { date: { $gte: sixMonthsAgo } },
+          ],
+          status: { $in: ["Completed", "completed"] },
+        },
       },
       {
         $group: {
           _id: {
-            month: { $month: "$date" },
-            year: { $year: "$date" }
+            month: { $month: "$appointmentDate" },
+            year: { $year: "$appointmentDate" },
           },
           count: { $sum: 1 }
         }

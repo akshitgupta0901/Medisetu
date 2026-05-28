@@ -64,10 +64,10 @@ export default function AdminAppointmentsPage() {
     id: a._id,
     patient: a.patient?.name ?? a.patientId,
     doctor: a.doctor?.name ?? a.doctorId,
-    date: a.date,
-    time: a.time,
+    date: a.appointmentDate || a.date,
+    time: a.appointmentTime || a.time,
     status: a.status,
-    type: a.type,
+    type: a.appointmentType || a.type,
     department: a.department,
   }));
 
@@ -78,22 +78,27 @@ export default function AdminAppointmentsPage() {
       actions={<ExportButton data={exportRows} filename="appointments-export" />}
     >
       <div className="flex flex-wrap gap-2">
-        {(["all", "pending", "approved", "completed", "cancelled"] as const).map(
-          (s) => (
+        {(
+          [
+            { id: "all", label: "All" },
+            { id: "Scheduled", label: "Scheduled" },
+            { id: "Completed", label: "Completed" },
+            { id: "Cancelled", label: "Cancelled" },
+          ] as const
+        ).map((s) => (
             <button
-              key={s}
+              key={s.id}
               type="button"
-              onClick={() => setStatusFilter(s)}
-              className={`px-3 py-1.5 rounded-lg text-xs border capitalize ${
-                statusFilter === s
+              onClick={() => setStatusFilter(s.id)}
+              className={`px-3 py-1.5 rounded-lg text-xs border ${
+                statusFilter === s.id
                   ? "border-teal-500/40 bg-teal-500/10 text-teal-300"
                   : "border-slate-700 text-slate-400"
               }`}
             >
-              {s}
+              {s.label}
             </button>
-          )
-        )}
+          ))}
       </div>
 
       {error && (

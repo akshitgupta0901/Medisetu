@@ -4,7 +4,17 @@ import { useEffect, useState } from "react";
 import GlassCard from "./glasscard";
 import { authFetch } from "@/lib/fetch-auth";
 import type { SafeAppointment } from "@/types/appointment";
+import {
+  isUpcomingAppointmentStatus,
+  formatAppointmentTypeLabel,
+} from "@/lib/appointments";
 import StatusBadge from "@/components/appointments/statusbadge";
+
+function sortByDate(a: SafeAppointment, b: SafeAppointment) {
+  const aTime = new Date(a.appointmentDate || a.date).getTime();
+  const bTime = new Date(b.appointmentDate || b.date).getTime();
+  return aTime - bTime;
+}
 
 export default function AppointmentCard() {
   const [nextAppt, setNextAppt] = useState<SafeAppointment | null>(null);
@@ -17,18 +27,12 @@ export default function AppointmentCard() {
         const data = await res.json();
         if (res.ok && data.success) {
           const upcoming = data.appointments
-            .filter(
-              (a: SafeAppointment) =>
-                a.status === "pending" || a.status === "approved"
-            )
-            .sort(
-              (a: SafeAppointment, b: SafeAppointment) =>
-                new Date(a.date).getTime() - new Date(b.date).getTime()
-            );
+            .filter((a: SafeAppointment) => isUpcomingAppointmentStatus(a.status))
+            .sort(sortByDate);
           setNextAppt(upcoming[0] ?? null);
         }
       } catch {
-        /* keep static fallback */
+        /* keep empty state */
       } finally {
         setLoading(false);
       }
@@ -60,6 +64,12 @@ export default function AppointmentCard() {
     );
   }
 
+  const displayDate = nextAppt.appointmentDate || nextAppt.date;
+  const displayTime = nextAppt.appointmentTime || nextAppt.time;
+  const displayType = formatAppointmentTypeLabel(
+    nextAppt.appointmentType || nextAppt.type
+  );
+
   return (
     <GlassCard className="md:col-span-5 p-8 flex flex-col">
       <div className="flex justify-between items-start mb-6">
@@ -81,10 +91,11 @@ export default function AppointmentCard() {
 
       <div className="bg-slate-950 border border-slate-800 rounded-2xl p-5 mb-6">
         <p className="font-semibold">
-          {nextAppt.date} at {nextAppt.time}
+          {displayDate} at {displayTime}
         </p>
         <p className="text-sm text-slate-400 mt-2 capitalize">
-          {nextAppt.type.replace("-", " ")} · {nextAppt.reason}
+          {displayType}
+          {nextAppt.reason ? ` · ${nextAppt.reason}` : ""}
         </p>
       </div>
 

@@ -120,27 +120,52 @@ export default function StatsCards() {
   if (!stats) return null;
 
   return (
-    <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-      {CARD_CONFIG.map((card, index) => (
-        <motion.div
-          key={card.key}
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: index * 0.06 }}
-          className={`rounded-2xl border ${card.border} bg-gradient-to-br ${card.gradient} p-5 md:p-6 shadow-xl`}
-        >
-          <div className="flex justify-between items-start mb-4">
-            <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-              {card.badge}
-            </span>
-            <span className="text-2xl">{card.icon}</span>
+    <div className="space-y-8">
+      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+        {CARD_CONFIG.map((card, index) => (
+          <motion.div
+            key={card.key}
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: index * 0.06 }}
+            className={`rounded-2xl border ${card.border} bg-gradient-to-br ${card.gradient} p-5 md:p-6 shadow-xl`}
+          >
+            <div className="flex justify-between items-start mb-4">
+              <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+                {card.badge}
+              </span>
+              <span className="text-2xl">{card.icon}</span>
+            </div>
+            <p className="text-slate-400 text-xs uppercase">{card.label}</p>
+            <h2 className={`text-3xl md:text-4xl font-bold ${card.valueColor} mt-2`}>
+              {stats[card.key].toLocaleString()}
+            </h2>
+          </motion.div>
+        ))}
+      </section>
+
+      {stats.verification && (
+        <section>
+          <h3 className="text-sm font-bold text-slate-500 uppercase tracking-widest mb-4 flex items-center gap-2">
+            <span className="w-8 h-[1px] bg-slate-800" />
+            Doctor Verifications
+          </h3>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6">
+            <div className="p-6 rounded-2xl border border-yellow-500/20 bg-yellow-500/5 shadow-lg">
+              <p className="text-[10px] font-bold text-yellow-500 uppercase tracking-widest mb-1">Pending Review</p>
+              <h4 className="text-2xl font-bold text-white">{stats.verification.pending}</h4>
+            </div>
+            <div className="p-6 rounded-2xl border border-emerald-500/20 bg-emerald-500/5 shadow-lg">
+              <p className="text-[10px] font-bold text-emerald-500 uppercase tracking-widest mb-1">Approved Doctors</p>
+              <h4 className="text-2xl font-bold text-white">{stats.verification.approved}</h4>
+            </div>
+            <div className="p-6 rounded-2xl border border-red-500/20 bg-red-500/5 shadow-lg">
+              <p className="text-[10px] font-bold text-red-500 uppercase tracking-widest mb-1">Rejected Requests</p>
+              <h4 className="text-2xl font-bold text-white">{stats.verification.rejected}</h4>
+            </div>
           </div>
-          <p className="text-slate-400 text-xs uppercase">{card.label}</p>
-          <h2 className={`text-3xl md:text-4xl font-bold ${card.valueColor} mt-2`}>
-            {stats[card.key].toLocaleString()}
-          </h2>
-        </motion.div>
-      ))}
-    </section>
+        </section>
+      )}
+    </div>
   );
 }

@@ -1,16 +1,17 @@
 import type { AppointmentStatus } from "@/types/appointment";
 
-const styles: Record<AppointmentStatus, string> = {
-  pending: "text-amber-400 bg-amber-500/10 border-amber-500/20",
-  approved: "text-teal-400 bg-teal-500/10 border-teal-500/20",
-  completed: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20",
-  cancelled: "text-slate-400 bg-slate-800/50 border-slate-700",
-};
-
 export default function StatusBadge({ status }: { status: AppointmentStatus }) {
+  const styles: Record<AppointmentStatus, string> = {
+    Scheduled: "bg-blue-500/20 text-blue-300 border-blue-500/30",
+    Completed: "bg-emerald-500/20 text-emerald-300 border-emerald-500/30",
+    Cancelled: "bg-red-500/20 text-red-300 border-red-500/30",
+  };
+
   return (
     <span
-      className={`inline-flex px-2.5 py-1 rounded-lg text-xs font-medium border capitalize ${styles[status]}`}
+      className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${
+        styles[status] || "bg-slate-500/20 text-slate-300 border-slate-500/30"
+      }`}
     >
       {status}
     </span>

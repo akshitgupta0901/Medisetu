@@ -1,14 +1,39 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
+import Link from "next/link";
 import Sidebar from "@/components/doctor/sidebar";
 import TopBar from "@/components/doctor/topbar";
 import DoctorProfileEditor from "@/components/doctor/doctor-profile-editor";
+import DoctorAvailabilityEditor from "@/components/doctor/doctor-availability-editor";
+import DoctorVerification from "@/components/doctor/doctor-verification";
 import NotificationSettings from "@/components/patient/notification-settings";
+import { authFetch } from "@/lib/fetch-auth";
 import { User, Lock, Bell, Loader2 } from "lucide-react";
 
 export default function DoctorSettingsPage() {
   const [activeTab, setActiveTab] = useState("professional");
+  const [profile, setProfile] = useState<Record<string, unknown> | null>(null);
+  const [weeklySlotCount, setWeeklySlotCount] = useState(0);
+  const [profileLoading, setProfileLoading] = useState(true);
+
+  const fetchProfile = useCallback(async () => {
+    setProfileLoading(true);
+    try {
+      const res = await authFetch("/api/doctors/profile");
+      const data = await res.json();
+      if (data.success) {
+        setProfile(data.profile);
+        setWeeklySlotCount(data.profile.weeklySlotCount ?? 0);
+      }
+    } finally {
+      setProfileLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (activeTab === "professional") fetchProfile();
+  }, [activeTab, fetchProfile]);
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState({ type: "", text: "" });
 
@@ -102,7 +127,36 @@ export default function DoctorSettingsPage() {
                 )}
 
                 {activeTab === "professional" && (
-                  <DoctorProfileEditor />
+                  profileLoading ? (
+                    <div className="flex justify-center p-20">
+                      <Loader2 className="w-10 h-10 animate-spin text-teal-400" />
+                    </div>
+                  ) : (
+                    <div className="space-y-8">
+                      <p className="text-sm text-slate-400">
+                        Full verification workflow is on{" "}
+                        <Link href="/doctor/profile" className="text-teal-400 hover:underline">
+                          Professional Profile
+                        </Link>
+                        .
+                      </p>
+                      <DoctorProfileEditor
+                        initialProfile={profile}
+                        weeklySlotCount={weeklySlotCount}
+                        onRefresh={fetchProfile}
+                      />
+                      <DoctorAvailabilityEditor onSaved={fetchProfile} />
+                      <DoctorVerification
+                        profile={profile}
+                        completion={
+                          typeof profile?.completionPercent === "number"
+                            ? profile.completionPercent
+                            : 0
+                        }
+                        onRefresh={fetchProfile}
+                      />
+                    </div>
+                  )
                 )}
 
                 {activeTab === "security" && (

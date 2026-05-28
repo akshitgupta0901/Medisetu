@@ -2,8 +2,15 @@ import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongodb";
 import TriageReport from "@/models/triage-report";
 import Appointment from "@/models/appointment";
+import Doctor from "@/models/doctor";
 import { requireAuth, forbiddenResponse } from "@/lib/api-auth";
-import { toSafeAppointment } from "@/lib/appointments";
+import {
+  toSafeAppointment,
+  parseAppointmentDate,
+  isWithinBookingWindow,
+  normalizeAppointmentStatus,
+  mapBookingTypeToAppointmentType,
+} from "@/lib/appointments";
 import { createNotification } from "@/lib/notifications";
 
 export async function POST(
@@ -20,11 +27,29 @@ export async function POST(
 
     const { id } = await params;
     const body = await req.json();
-    const { date, time, department } = body;
+    const dateStr = body.appointmentDate ?? body.date;
+    const appointmentTime = String(body.appointmentTime ?? body.time ?? "").trim();
+    const appointmentType = mapBookingTypeToAppointmentType(
+      body.appointmentType ?? body.type ?? "Online"
+    );
+    const notes =
+      body.notes?.trim() ||
+      `Follow-up: ${String(body.reason ?? "").slice(0, 120)}`;
 
-    if (!date || !time) {
+    if (!dateStr || !appointmentTime) {
       return NextResponse.json(
         { success: false, message: "Date and time are required" },
+        { status: 400 }
+      );
+    }
+
+    const appointmentDate = parseAppointmentDate(dateStr);
+    if (!appointmentDate || !isWithinBookingWindow(appointmentDate)) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Date must be between today and 60 days from now",
+        },
         { status: 400 }
       );
     }
@@ -49,16 +74,45 @@ export async function POST(
       );
     }
 
+    const doctorId = String(report.doctorId);
+    const doctorProfile = await Doctor.findOne({
+      userId: doctorId,
+      verificationStatus: "Approved",
+    });
+    if (!doctorProfile) {
+      return NextResponse.json(
+        { success: false, message: "Doctor is not verified" },
+        { status: 403 }
+      );
+    }
+
+    const { Types } = await import("mongoose");
+    const existingAppointment = await Appointment.findOne({
+      doctorId: new Types.ObjectId(doctorId),
+      appointmentDate: {
+        $gte: new Date(appointmentDate).setHours(0, 0, 0, 0),
+        $lte: new Date(appointmentDate).setHours(23, 59, 59, 999),
+      },
+      appointmentTime,
+      status: { $ne: "Cancelled" },
+    });
+
+    if (existingAppointment) {
+      return NextResponse.json(
+        { success: false, message: "This time slot is already booked" },
+        { status: 409 }
+      );
+    }
+
     const appointment = await Appointment.create({
       patientId: report.patientId,
       doctorId: report.doctorId,
-      date: new Date(date),
-      time: String(time),
-      reason: `Follow-up: ${report.symptoms.slice(0, 120)}`,
-      department: department || report.analysis.recommendedSpecialist || "General",
-      type: "telehealth",
-      status: "pending",
-      notes: report.doctorNotes,
+      triageReportId: report._id,
+      appointmentDate,
+      appointmentTime,
+      appointmentType,
+      status: normalizeAppointmentStatus("Scheduled"),
+      notes: notes || report.doctorNotes,
     });
 
     report.appointmentId = appointment._id;
@@ -68,9 +122,10 @@ export async function POST(
     await createNotification({
       userId: String(report.patientId),
       title: "Appointment recommended",
-      message: "Your doctor scheduled a follow-up appointment from your triage report.",
+      message:
+        "Your doctor scheduled a follow-up appointment from your triage report.",
       type: "appointment",
-      link: "/patient",
+      link: "/patient/appointments",
     });
 
     const populated = await Appointment.findById(appointment._id).populate([
