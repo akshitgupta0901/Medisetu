@@ -8,7 +8,14 @@ import type { TokenPayload } from "@/types/auth";
 export async function getAuthFromRequest(
   req: Request
 ): Promise<TokenPayload | null> {
-  // Try NextAuth session first to match middleware priority
+  // 1. Try custom JWT header first (explicit authorization takes precedence)
+  const headerToken = getTokenFromRequest(req);
+  if (headerToken) {
+    const payload = verifyToken(headerToken);
+    if (payload) return payload;
+  }
+
+  // 2. Try NextAuth session
   try {
     const nextAuthToken = await getToken({
       req: req as any,
@@ -26,14 +33,7 @@ export async function getAuthFromRequest(
     console.error("NextAuth getToken error:", error);
   }
 
-  // Try custom JWT header
-  const headerToken = getTokenFromRequest(req);
-  if (headerToken) {
-    const payload = verifyToken(headerToken);
-    if (payload) return payload;
-  }
-
-  // Try custom JWT cookie
+  // 3. Try custom JWT cookie
   const cookieStore = await cookies();
   const cookieToken = cookieStore.get(TOKEN_COOKIE_NAME)?.value;
   if (cookieToken) {

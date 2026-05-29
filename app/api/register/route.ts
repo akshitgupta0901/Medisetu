@@ -20,13 +20,13 @@ import { PUBLIC_REGISTER_ROLES } from "@/types/auth";
 export async function POST(req: Request) {
   try {
     const body = (await req.json()) as RegisterBody;
-    const { name, email, password, role, specialization, otp } = body;
+    const { name, email, password, role, specialization } = body;
 
-    if (!name?.trim() || !email?.trim() || !password || !role || !otp?.trim()) {
+    if (!name?.trim() || !email?.trim() || !password || !role) {
       return NextResponse.json<AuthErrorResponse>(
         {
           success: false,
-          message: "Name, email, password, role, and verification OTP are required",
+          message: "Name, email, password, and role are required",
         },
         { status: 400 }
       );
@@ -58,14 +58,6 @@ export async function POST(req: Request) {
     }
 
     const normalizedEmail = normalizeEmail(email);
-
-    const otpResult = await verifyOtp(normalizedEmail, otp.trim(), "register");
-    if (!otpResult.valid) {
-      return NextResponse.json<AuthErrorResponse>(
-        { success: false, message: otpResult.message },
-        { status: 400 }
-      );
-    }
 
     await connectDB();
 
