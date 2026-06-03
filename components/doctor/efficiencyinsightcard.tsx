@@ -1,8 +1,11 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { useRouter } from "next/navigation";
 
 export default function EfficiencyInsightCard() {
+  const router = useRouter();
+  
   return (
     <motion.div
       initial={{ opacity: 0, y: 15 }}
@@ -35,6 +38,7 @@ export default function EfficiencyInsightCard() {
       </p>
 
       <button
+        onClick={() => router.push("/doctor/ai-reports")}
         className="
           mt-6
           w-full
@@ -47,7 +51,7 @@ export default function EfficiencyInsightCard() {
           transition
         "
       >
-        Generate Report
+        View AI Reports
       </button>
     </motion.div>
   );

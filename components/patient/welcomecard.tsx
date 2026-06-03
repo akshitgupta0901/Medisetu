@@ -123,16 +123,16 @@ export default function WelcomeCard() {
                 className="mt-6 flex gap-4"
               >
                 <a
-                  href="/patient/triage"
+                  href="/patient/appointments"
                   className="rounded-xl bg-teal-500 hover:bg-teal-400 text-black font-bold px-6 py-3 transition"
                 >
-                  Check Symptoms
+                  Book Appointment
                 </a>
                 <a
-                  href="#appointments"
+                  href="/patient/triage"
                   className="rounded-xl border border-slate-700 hover:bg-slate-800 text-white font-bold px-6 py-3 transition"
                 >
-                  Book Appointment
+                  Check Symptoms
                 </a>
               </motion.div>
 

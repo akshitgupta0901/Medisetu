@@ -21,15 +21,15 @@ export default function ActivityChart() {
       transition={{ duration: 0.5, delay: 0.12, ease: [0.22, 1, 0.36, 1] }}
       aria-label="Weekly activity chart"
     >
-      <GlassCard className="relative overflow-hidden p-6 transition duration-300 hover:border-[#67e8f9]/40 hover:shadow-xl hover:shadow-cyan-950/20 md:p-8">
+      <GlassCard className="relative overflow-hidden p-5 md:p-6 transition duration-300 hover:border-[#67e8f9]/40 hover:shadow-xl hover:shadow-cyan-950/20 h-full flex flex-col">
         <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#67e8f9]/60 to-transparent" />
 
-        <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#67e8f9]">
               Movement intelligence
             </p>
-            <h2 className="mt-3 text-2xl font-semibold tracking-tight text-[#f8fafc] md:text-3xl">
+            <h2 className="mt-3 text-xl font-semibold tracking-tight text-[#f8fafc] md:text-2xl">
               Weekly Activity
             </h2>
             <p className="mt-2 text-sm leading-6 text-[#94a3b8]">
@@ -37,17 +37,18 @@ export default function ActivityChart() {
             </p>
           </div>
 
-          <div className="rounded-2xl border border-[#67e8f9]/15 bg-cyan-400/[0.055] px-5 py-4 text-left sm:text-right">
-            <h3 className="text-3xl font-semibold tracking-tight text-cyan-400">
+          <div className="rounded-2xl border border-[#67e8f9]/15 bg-cyan-400/[0.055] px-4 py-3 text-left sm:text-right">
+            <h3 className="text-xl font-semibold tracking-tight text-cyan-400">
               7,432
             </h3>
-            <p className="mt-1 text-xs font-semibold uppercase tracking-[0.18em] text-[#94a3b8]">
+            <p className="mt-0.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-[#94a3b8]">
               Steps avg
             </p>
           </div>
         </div>
 
-        <div className="mt-8 grid min-h-64 grid-cols-7 items-end gap-2 rounded-3xl border border-white/10 bg-[#071827]/70 p-4 sm:gap-4 sm:p-6">
+        <div className="flex-1 flex flex-col justify-center mt-4">
+          <div className="grid h-36 grid-cols-7 items-end gap-2 rounded-2xl border border-white/10 bg-[#071827]/70 p-3 sm:gap-3 sm:p-4">
           {activity.map((item, index) => (
             <div key={item.day} className="flex h-full flex-col justify-end gap-3">
               <div className="flex flex-1 items-end">
@@ -71,6 +72,7 @@ export default function ActivityChart() {
               </p>
             </div>
           ))}
+          </div>
         </div>
       </GlassCard>
     </motion.section>

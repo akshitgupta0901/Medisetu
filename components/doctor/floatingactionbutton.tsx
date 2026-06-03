@@ -1,8 +1,13 @@
 "use client";
 
+import { useRouter } from "next/navigation";
+
 export default function FloatingActionButton() {
+  const router = useRouter();
+
   return (
     <button
+      onClick={() => router.push("/doctor/appointments")}
       className="
         fixed
         bottom-24

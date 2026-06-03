@@ -23,15 +23,15 @@ export default function SleepRecovery() {
       transition={{ duration: 0.5, delay: 0.16, ease: [0.22, 1, 0.36, 1] }}
       aria-label="Rest and recovery"
     >
-      <GlassCard className="relative overflow-hidden p-6 transition duration-300 hover:border-[#67e8f9]/40 hover:shadow-xl hover:shadow-cyan-950/20 md:p-8">
+      <GlassCard className="relative overflow-hidden p-5 md:p-6 transition duration-300 hover:border-[#67e8f9]/40 hover:shadow-xl hover:shadow-cyan-950/20 h-full flex flex-col">
         <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#5eead4]/60 to-transparent" />
 
-        <div className="grid gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
+        <div className="flex flex-col gap-6 h-full">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.22em] text-teal-400">
               Recovery analytics
             </p>
-            <h2 className="mt-3 text-2xl font-semibold tracking-tight text-[#f8fafc] md:text-3xl">
+            <h2 className="mt-3 text-xl font-semibold tracking-tight text-[#f8fafc] md:text-2xl">
               Rest & Recovery
             </h2>
             <p className="mt-2 text-sm leading-6 text-[#94a3b8]">
@@ -39,7 +39,7 @@ export default function SleepRecovery() {
             </p>
 
             <div className="mt-6 flex items-end gap-3">
-              <h3 className="text-4xl font-semibold tracking-tight text-[#ccfbf1]">
+              <h3 className="text-3xl font-semibold tracking-tight text-[#ccfbf1]">
                 7h 20m
               </h3>
               <p className="pb-1 text-sm font-medium text-teal-400">
@@ -64,7 +64,7 @@ export default function SleepRecovery() {
             </div>
           </div>
 
-          <div className="rounded-3xl border border-white/10 bg-[#071827]/70 p-5">
+          <div className="mt-auto rounded-3xl border border-white/10 bg-[#071827]/70 p-5">
             <div className="flex h-28 overflow-hidden rounded-2xl bg-white/[0.04]">
               {sleepStages.map((stage, index) => (
                 <motion.div

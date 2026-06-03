@@ -34,13 +34,13 @@ export default function MedicalRecordSummary() {
 
   return (
     <motion.section
-      className="md:col-span-4"
+      className="h-full flex flex-col"
       initial={{ opacity: 0, y: 14 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.45, delay: 0.08 }}
       aria-label="Medical record summary"
     >
-      <GlassCard className="relative overflow-hidden p-6 md:p-8">
+      <GlassCard className="relative overflow-hidden p-5 md:p-6 transition duration-300 hover:border-[#67e8f9]/40 hover:shadow-xl hover:shadow-cyan-950/20 h-full flex flex-col">
         <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#5eead4]/60 to-transparent" />
 
         <div className="flex items-start justify-between gap-4">
@@ -48,7 +48,7 @@ export default function MedicalRecordSummary() {
             <p className="text-xs font-semibold uppercase tracking-[0.22em] text-teal-400">
               Medical record
             </p>
-            <h2 className="mt-2 text-2xl font-semibold text-[#f8fafc]">
+            <h2 className="mt-2 text-xl font-semibold text-[#f8fafc]">
               {loading ? "Loading..." : record ? "Profile on file" : "No record yet"}
             </h2>
           </div>
@@ -75,27 +75,27 @@ export default function MedicalRecordSummary() {
           </div>
         ) : (
           <>
-            <div className="mt-5 grid grid-cols-3 gap-2">
-              <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-3">
-                <p className="text-[11px] uppercase text-[#94a3b8]">Allergies</p>
-                <p className="mt-1 text-sm font-semibold text-[#f87171]">
+            <div className="mt-5 grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6">
+              <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 md:p-5 flex flex-col justify-center text-center">
+                <p className="text-xs md:text-sm uppercase tracking-wider text-[#94a3b8] font-semibold">Allergies</p>
+                <p className="mt-2 text-xl md:text-3xl font-semibold text-[#f87171]">
                   {allergyCount || "None"}
                 </p>
               </div>
-              <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-3">
-                <p className="text-[11px] uppercase text-[#94a3b8]">Medications</p>
-                <p className="mt-1 text-sm font-semibold text-teal-400">{medCount}</p>
+              <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 md:p-5 flex flex-col justify-center text-center">
+                <p className="text-xs md:text-sm uppercase tracking-wider text-[#94a3b8] font-semibold">Medications</p>
+                <p className="mt-2 text-xl md:text-3xl font-semibold text-teal-400">{medCount}</p>
               </div>
-              <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-3">
-                <p className="text-[11px] uppercase text-[#94a3b8]">History</p>
-                <p className="mt-1 text-sm font-semibold text-blue-400">{historyCount}</p>
+              <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 md:p-5 flex flex-col justify-center text-center">
+                <p className="text-xs md:text-sm uppercase tracking-wider text-[#94a3b8] font-semibold">History</p>
+                <p className="mt-2 text-xl md:text-3xl font-semibold text-blue-400">{historyCount}</p>
               </div>
             </div>
 
             {record.allergies.length > 0 && (
-              <div className="mt-4 rounded-2xl border border-red-500/20 bg-red-950/20 p-3">
-                <p className="text-xs text-red-300 font-medium">Allergies</p>
-                <p className="text-sm text-[#fca5a5] mt-1">
+              <div className="mt-6 rounded-2xl border border-red-500/20 bg-red-950/20 p-4 md:p-5">
+                <p className="text-sm text-red-300 font-semibold tracking-wide">Known Allergies</p>
+                <p className="text-base text-[#fca5a5] mt-2">
                   {record.allergies.join(", ")}
                 </p>
               </div>
@@ -103,7 +103,7 @@ export default function MedicalRecordSummary() {
 
             <Link
               href="/patient/profile"
-              className="mt-4 inline-block text-sm text-[teal-400] hover:underline"
+              className="mt-auto pt-4 inline-block text-sm text-[teal-400] hover:underline"
             >
               View full profile →
             </Link>

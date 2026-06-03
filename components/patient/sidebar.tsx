@@ -7,9 +7,9 @@ import { usePathname } from "next/navigation";
 
 const navItems = [
   { label: "Dashboard", href: "/patient" },
+  { label: "Book Appointment", href: "/patient/appointments", primary: true },
   { label: "Medical Profile", href: "/patient/profile" },
-  { label: "AI Triage", href: "/patient/triage" },
-  { label: "My Appointments", href: "/patient/appointments" },
+  { label: "Check Symptoms", href: "/patient/triage" },
   { label: "Live Consultations", href: "/telehealth" },
   { label: "Lab Results", href: "/patient/lab-results" },
   { label: "My Prescriptions", href: "/patient/prescriptions" },
@@ -39,9 +39,13 @@ export default function Sidebar() {
             key={item.label}
             href={item.href}
             className={`block rounded-lg px-4 py-3 text-sm transition ${
-              pathname === item.href
-                ? "bg-teal-500/15 text-teal-400 border border-teal-500/20"
-                : "text-slate-300 hover:bg-slate-800 hover:text-teal-400"
+              item.primary
+                ? pathname === item.href
+                  ? "bg-teal-300 text-slate-950 font-bold shadow-lg shadow-teal-500/15"
+                  : "bg-teal-300 text-slate-950 font-bold shadow-lg shadow-teal-500/15 hover:bg-teal-200"
+                : pathname === item.href
+                  ? "bg-teal-500/15 text-teal-400 border border-teal-500/20"
+                  : "text-slate-300 hover:bg-slate-800 hover:text-teal-400"
             }`}
           >
             {item.label}

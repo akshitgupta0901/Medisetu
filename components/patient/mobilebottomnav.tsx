@@ -7,12 +7,12 @@ export default function MobileBottomNav() {
         Home
       </Link>
 
-      <Link href="/patient/triage" className="text-slate-400 text-xs hover:text-teal-400">
-        Triage
+      <Link href="/patient/appointments" className="text-slate-400 text-xs hover:text-teal-400">
+        Book
       </Link>
 
-      <Link href="/patient#appointments" className="text-slate-400 text-xs hover:text-teal-400">
-        Book
+      <Link href="/patient/triage" className="text-slate-400 text-xs hover:text-teal-400">
+        Symptoms
       </Link>
 
       <Link href="/patient/lab-results" className="text-slate-400 text-xs hover:text-teal-400">

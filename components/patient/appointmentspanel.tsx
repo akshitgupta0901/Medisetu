@@ -273,9 +273,18 @@ export default function AppointmentsPanel() {
         </div>
       ) : upcoming.length === 0 ? (
         <div className="py-12 text-center border border-dashed border-slate-800 rounded-2xl">
-          <p className="text-slate-500 text-sm">
-            No upcoming appointments scheduled. Use &quot;+ Book Appointment&quot; above.
+          <p className="text-base font-semibold text-white">
+            You&apos;re all caught up.
           </p>
+          <p className="mt-2 text-slate-400 text-sm">
+            Book your next consultation with a healthcare professional.
+          </p>
+          <Link
+            href="/patient/appointments"
+            className="mt-5 inline-flex min-h-11 items-center justify-center rounded-xl bg-teal-300 px-4 py-2 text-sm font-bold text-slate-950 shadow-lg shadow-teal-500/15 transition hover:bg-teal-200"
+          >
+            Book Appointment
+          </Link>
         </div>
       ) : (
         <div className="space-y-3 max-h-[480px] overflow-y-auto pr-1">
