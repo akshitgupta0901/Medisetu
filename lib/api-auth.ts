@@ -15,7 +15,15 @@ export async function getAuthFromRequest(
     if (payload) return payload;
   }
 
-  // 2. Try NextAuth session
+  // 2. Try custom JWT cookie first (to match middleware precedence)
+  const cookieStore = await cookies();
+  const cookieToken = cookieStore.get(TOKEN_COOKIE_NAME)?.value;
+  if (cookieToken) {
+    const payload = verifyToken(cookieToken);
+    if (payload) return payload;
+  }
+
+  // 3. Try NextAuth session
   try {
     const nextAuthToken = await getToken({
       req: req as any,
@@ -24,21 +32,13 @@ export async function getAuthFromRequest(
 
     if (nextAuthToken?.userId) {
       return {
-        userId: nextAuthToken.userId,
+        userId: nextAuthToken.userId as string,
         email: nextAuthToken.email as string,
-        role: nextAuthToken.role,
+        role: nextAuthToken.role as any,
       };
     }
   } catch (error) {
     console.error("NextAuth getToken error:", error);
-  }
-
-  // 3. Try custom JWT cookie
-  const cookieStore = await cookies();
-  const cookieToken = cookieStore.get(TOKEN_COOKIE_NAME)?.value;
-  if (cookieToken) {
-    const payload = verifyToken(cookieToken);
-    if (payload) return payload;
   }
 
   return null;

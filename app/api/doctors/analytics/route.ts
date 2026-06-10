@@ -6,10 +6,17 @@ import Patient from "@/models/Patient";
 import { requireAuth, forbiddenResponse } from "@/lib/api-auth";
 
 export async function GET(req: Request) {
+  console.log("=== API REQUEST ===");
+  console.log("URL:", req.url);
+  console.log("Method:", req.method);
+  console.log("Headers:", Object.fromEntries(req.headers.entries()));
+  console.log("Cookies:", req.headers.get("cookie"));
+
   try {
     const auth = await requireAuth(req);
+    console.log("Auth result:", auth);
     if (auth instanceof NextResponse) return auth;
-
+    console.log("AUTH:", auth);
     if (auth.role !== "doctor" && auth.role !== "admin") {
       return forbiddenResponse();
     }
