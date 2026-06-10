@@ -1,7 +1,6 @@
 import Sidebar from "@/components/doctor/sidebar";
 import TopBar from "@/components/doctor/topbar";
-import EmergencyBanner from "@/components/doctor/emergencybanner";
-
+import VerificationBanner from "@/components/doctor/verificationbanner";
 import TriageVelocityCard from "@/components/doctor/triagevelocitycard";
 import CriticalCasesCard from "@/components/doctor/criticalcasescard";
 import EfficiencyInsightCard from "@/components/doctor/efficiencyinsightcard";
@@ -25,10 +24,11 @@ export default function DoctorDashboard() {
       <Sidebar />
 
       <div className="md:ml-[240px]">
-        <EmergencyBanner />
+
         <TopBar />
 
         <main className="p-6 space-y-8">
+          <VerificationBanner />
           <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <TriageVelocityCard />
             <CriticalCasesCard />

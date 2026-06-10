@@ -191,8 +191,17 @@ export async function PATCH(req: Request, context: RouteContext) {
     if (body.appointmentTime) appointment.appointmentTime = body.appointmentTime.trim();
     if (body.notes !== undefined) appointment.notes = body.notes.trim();
 
-    console.log("DEBUG APPOINTMENT ID PATCH: SAVING CHANGES");
-    await appointment.save();
+    console.log("DEBUG APPOINTMENT ID PATCH: SAVING CHANGES", {
+      appointmentId: id,
+      triageReportId: appointment.triageReportId,
+      patientId: appointment.patientId,
+      doctorId: appointment.doctorId,
+      newStatus: appointment.status,
+    });
+    // validateModifiedOnly: true prevents ValidationError on legacy appointments
+    // that are missing fields added after their creation (e.g. triageReportId).
+    // Mongoose by default validates ALL required fields on save(), not just changed ones.
+    await appointment.save({ validateModifiedOnly: true });
 
     const updated = await findAppointment(id);
     const updatedDoctorIdStr = getObjectIdString(updated!.doctorId);
@@ -243,14 +252,19 @@ export async function PATCH(req: Request, context: RouteContext) {
   } catch (error: any) {
     console.error("DEBUG APPOINTMENT ID PATCH CRASH:", {
       message: error.message,
+      name: error.name,
       stack: error.stack,
-      error
+      errors: error.errors, // Mongoose ValidationError details
     });
     return NextResponse.json({
       success: false,
       message: "Internal server error",
+      // Always expose the real error so Vercel logs and client can diagnose
       error: error.message,
-      stack: process.env.NODE_ENV === "development" ? error.stack : undefined
+      errorName: error.name,
+      validationErrors: error.errors
+        ? Object.entries(error.errors).map(([k, v]: [string, any]) => ({ field: k, message: v.message }))
+        : undefined,
     }, { status: 500 });
   }
 }
